@@ -1,13 +1,21 @@
 -module(platypus).
--export([start/1, step/1, get_stats/1]).
+-export([start/1, start/2, step/1, get_stats/1]).
 -export([init/1, handle_cast/2, handle_call/3, terminate/2]).
 -behavior(gen_server).
 
+-record(actions, {reproduce = 50,
+		  get_food = 50}).
 
 %% API %%
 
 start(Habitat) ->
-    {ok, Pid} = gen_server:start_link(?MODULE, {Habitat, stats:new()}, []),
+    start(
+      stats:set([{energy, 10},
+		 {actions, #actions{}}],
+		stats:new()), Habitat).
+
+start(Stats, Habitat) ->
+    {ok, Pid} = gen_server:start_link(?MODULE, {Habitat, Stats}, []),
     Pid.
 
 step(Name) ->
@@ -16,6 +24,55 @@ step(Name) ->
 get_stats(Name) ->
     gen_server:call(Name, get_stats).
 
+% Internal functions
+
+act(Stats, Habitat) ->
+    Random = habitat:random(Habitat, 1, 100),
+    {actions, Actions} = stats:get(actions, Stats),
+
+    Reproduce = Actions#actions.reproduce,
+    GetFood   = Actions#actions.get_food,
+
+    if
+    	Random < Reproduce ->
+    	    reproduce(Stats, Habitat),
+    	    Stats;
+    	Random < GetFood + Reproduce ->
+    	    get_food(Stats, Habitat);
+	true ->
+	    Stats
+    end.
+
+normalize_actions(#actions{reproduce = Reproduce,
+			   get_food  = GetFood
+			  }) ->
+    F = 100 / (Reproduce + GetFood),
+    #actions{reproduce = Reproduce * F,
+	     get_food  = GetFood   * F}.    
+
+mutate(Stats, Habitat) ->
+    {actions, A} = stats:get(actions, Stats),
+    R1 = habitat:random(Habitat, -1, 1),
+    R2 = habitat:random(Habitat, -1, 1),
+    NewA = normalize_actions(#actions{reproduce = A#actions.reproduce + R1,
+				      get_food  = A#actions.get_food  + R2}),
+    stats:set(actions, NewA, Stats).
+
+reproduce(Stats, Habitat) ->
+    Random = habitat:random(Habitat, 1, 30),
+    if
+	Random == 30 ->
+	    NewStats = mutate(Stats, Habitat),
+	    habitat:create_animal(NewStats, Habitat),
+	    true;
+	true -> false
+    end.
+
+get_food(Stats, Habitat) ->
+    {energy, Energy} = stats:get(energy, Stats),
+    NewEnergy = min(10, Energy + habitat:get_food(self(), Habitat)),
+    NewStats = stats:set(energy, NewEnergy, Stats),
+    NewStats.
 
 %% Callbacks %%
 
@@ -26,16 +83,17 @@ terminate(_Reason, _LoopData) ->
     ok.
 
 handle_cast(step, {Habitat, Stats}) ->
-    {energy, Energy} = stats:get(energy, Stats, 10),
-    Food = lists:sum(
-	     [ habitat:get_food(self(), Habitat) || _ <- lists:seq(0, 2) ]
-	    ),
-    NewEnergy = Energy - 1 + Food,
+
+    Stats2 = lists:foldr(fun (_, Acc) -> act(Acc, Habitat) end,
+			 Stats,
+			 lists:seq(1, 10)),
+
+    {energy, Energy} = stats:get(energy, Stats2),
+    NewStats = stats:set(energy, Energy - 1, Stats2),
     if
-    	NewEnergy == 0 ->
-    	    {stop, normal, {Habitat, Stats}};
+	Energy =< 0 ->
+    	    {stop, normal, {Habitat, NewStats}};
     	true ->
-    	    NewStats = stats:set(energy, NewEnergy, Stats),
     	    {noreply, {Habitat, NewStats}}
     end.
 

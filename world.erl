@@ -20,7 +20,7 @@ get_food(Animal, World) ->
 
 init(_) ->
     Stats = stats:set([{max_food, 100},
-		       {food_growth, 10},
+		       {food_growth, 3},
 		       {food, 50}
 		      ], stats:new()),
     {ok, Stats}.

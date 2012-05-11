@@ -1,2 +1,2 @@
 all:
-	erlc habitat.erl world.erl platypus.erl
+	erlc habitat.erl world.erl platypus.erl stats.erl

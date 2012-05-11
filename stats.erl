@@ -1,12 +1,18 @@
 -module(stats).
--export([new/0, set/3, get/2, get/3]).
+-export([new/0, set/3, set/2, get/2, get/3]).
 -include_lib("eunit/include/eunit.hrl").
 
 new() ->
     {stats, []}.
 
+
 set(Key, Value, {stats, List}) ->
     {stats, lists:keystore(Key, 1, List, {Key, Value})}.
+
+set(Values, Stats = {stats, _}) when is_list(Values) ->
+    lists:foldr(fun ({K, V}, S) -> stats:set(K, V, S) end,
+		Stats,
+		Values).
 
 get(Key, {stats, List}) ->
     lists:keyfind(Key, 1, List).

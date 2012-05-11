@@ -1,10 +1,46 @@
 -module(world).
--export([]).
+-export([start/0, get_food/2, step/1, list/1]).
+-export([init/1, handle_cast/2, handle_call/3]).
+-behavior(gen_server).
 
+start() ->
+    {ok, Pid} = gen_server:start_link(?MODULE, [], []),
+    Pid.
 
-init(PlatypusCount) ->
-    process_flag(trap_exit, true),
-    start_platypus(PlatypusCount).
+step(World) ->
+    gen_server:cast(World, step).
 
-start_platypus(0) -> [];
-start_platypus(N) -> [platypus:start() | start_platypus(N-1)].
+list(World) ->
+    gen_server:call(World, list).
+
+get_food(Animal, World) ->
+    gen_server:call(World, {get_food, Animal}).
+
+% Callbacks %
+
+init(_) ->
+    Stats = stats:set([{max_food, 100},
+		       {food_growth, 10},
+		       {food, 50}
+		      ], stats:new()),
+    {ok, Stats}.
+
+handle_cast(step, Stats) ->
+    {food_growth, Growth} = stats:get(food_growth, Stats),
+    {food, Food} = stats:get(food, Stats),
+    {max_food, MaxFood} = stats:get(max_food, Stats),
+    NewFood = min(MaxFood, Food + Growth),
+    NewStats = stats:set(food, NewFood, Stats),
+    {noreply, NewStats}.
+    
+handle_call(list, _From, Stats) ->
+    {reply, Stats, Stats};
+
+handle_call({get_food, _Animal}, _From, Stats) ->
+    case stats:get(food, Stats) of
+	{food, S} when S > 0 ->
+	    NewStats = stats:set(food, S-1, Stats),
+	    {reply, {food, 1}, NewStats};
+	true ->
+	    {reply, {food, 0}, Stats}
+    end.

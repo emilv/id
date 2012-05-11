@@ -1,6 +1,6 @@
 -module(habitat).
 -export([start/1, create_animal/1, list/1, step/1]).
--export([init/1, handle_cast/2, handle_call/3]).
+-export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).
 
 start(N) ->
@@ -20,6 +20,7 @@ step(Name) ->
 %% Callbacks %%
 
 init(N) ->
+    process_flag(trap_exit, true),
     Animals = [ platypus:start() || _ <- lists:seq(1, N) ],
     {ok, Animals}.
 
@@ -34,3 +35,7 @@ handle_cast(create, Animals) ->
 handle_call(list, _From, Animals) ->
     Reply = [ platypus:get_stats(Name) || Name <- Animals ],
     {reply, Reply, Animals}.
+
+handle_info({'EXIT', Pid, Reason}, Animals) ->
+    NewAnimals = lists:filter(fun (Pid2) -> Pid =/= Pid2 end, Animals),
+    {noreply, NewAnimals}.

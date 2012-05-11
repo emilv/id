@@ -8,7 +8,7 @@ Uppsala university
 
 ==== GROUP ==== 
 
-02 (change this to your group number).
+02
 
 
 ==== PROJECT NAME ==== 

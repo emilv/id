@@ -3,15 +3,17 @@
 -export([init/1, handle_cast/2, handle_call/3, terminate/2]).
 -behavior(gen_server).
 
--record(actions, {reproduce = 50,
-		  get_food = 50}).
+-record(actions, {reproduce = 20,
+		  get_food = 80}).
 
 %% API %%
 
 start(Habitat) ->
     start(
       stats:set([{energy, 10},
-		 {actions, #actions{}}],
+		 {actions, #actions{}},
+		 {age, 0}
+		],
 		stats:new()), Habitat).
 
 start(Stats, Habitat) ->
@@ -36,7 +38,8 @@ act(Stats, Habitat) ->
     if
     	Random < Reproduce ->
     	    reproduce(Stats, Habitat),
-    	    Stats;
+ 	    {energy, Energy} = stats:get(energy, Stats),
+	    NewStats = stats:set(energy, Energy/2, Stats);
     	Random < GetFood + Reproduce ->
     	    get_food(Stats, Habitat);
 	true ->
@@ -59,10 +62,12 @@ mutate(Stats, Habitat) ->
     stats:set(actions, NewA, Stats).
 
 reproduce(Stats, Habitat) ->
-    Random = habitat:random(Habitat, 1, 30),
+    Random = habitat:random(Habitat, 1, 5),
     if
-	Random == 30 ->
-	    NewStats = mutate(Stats, Habitat),
+	Random == 1 ->
+	    NewS = mutate(Stats, Habitat),
+	    {energy, Energy} = stats:get(energy, Stats),
+	    NewStats = stats:set(energy, Energy/2, NewS),
 	    habitat:create_animal(NewStats, Habitat),
 	    true;
 	true -> false
@@ -89,9 +94,10 @@ handle_cast(step, {Habitat, Stats}) ->
 			 lists:seq(1, 10)),
 
     {energy, Energy} = stats:get(energy, Stats2),
-    NewStats = stats:set(energy, Energy - 1, Stats2),
+    {age, Age} = stats:get(age, Stats2),
+    NewStats = stats:set([{energy, Energy - 1},{age, Age +1}], Stats2),
     if
-	Energy =< 0 ->
+	Energy =< 1.0 ->
     	    {stop, normal, {Habitat, NewStats}};
     	true ->
     	    {noreply, {Habitat, NewStats}}

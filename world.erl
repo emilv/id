@@ -40,7 +40,7 @@ handle_call({get_food, _Animal}, _From, Stats) ->
     case stats:get(food, Stats) of
 	{food, S} when S > 0 ->
 	    NewStats = stats:set(food, S-1, Stats),
-	    {reply, {food, 1}, NewStats};
-	true ->
-	    {reply, {food, 0}, Stats}
+	    {reply, 1, NewStats};
+	_ ->
+	    {reply, 0, Stats}
     end.

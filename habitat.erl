@@ -1,6 +1,6 @@
 -module(habitat).
 -export([start/1, create_animal/1, create_animal/2, get_food/2,
-	 list/1, step/1, random/2, random/3]).
+	 list/1, step/1, step/2, random/2, random/3]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).
 
@@ -22,6 +22,9 @@ list(Name) ->
 
 step(Name) ->
     gen_server:cast(Name, step).
+
+step(Name, N) ->
+    [step(Name) || _ <- lists:seq(1,N)].
 
 random(Name, Min, Max) ->
     gen_server:call(Name, {random, Min, Max}).

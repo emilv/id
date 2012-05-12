@@ -12,7 +12,8 @@ start(Habitat) ->
     start(
       stats:set([{energy, 10},
 		 {actions, #actions{}},
-		 {age, 0}
+		 {age, 0},
+		 {maxage, 10}
 		],
 		stats:new()), Habitat).
 
@@ -39,7 +40,7 @@ act(Stats, Habitat) ->
     	Random < Reproduce ->
     	    reproduce(Stats, Habitat),
  	    {energy, Energy} = stats:get(energy, Stats),
-	    NewStats = stats:set(energy, Energy/2, Stats);
+	    NewStats = stats:set(energy, Energy-2, Stats);
     	Random < GetFood + Reproduce ->
     	    get_food(Stats, Habitat);
 	true ->
@@ -67,7 +68,7 @@ reproduce(Stats, Habitat) ->
 	Random == 1 ->
 	    NewS = mutate(Stats, Habitat),
 	    {energy, Energy} = stats:get(energy, Stats),
-	    NewStats = stats:set(energy, Energy/2, NewS),
+	    NewStats = stats:set([{energy, Energy-2},{age, 0}], NewS),
 	    habitat:create_animal(NewStats, Habitat),
 	    true;
 	true -> false
@@ -95,10 +96,16 @@ handle_cast(step, {Habitat, Stats}) ->
 
     {energy, Energy} = stats:get(energy, Stats2),
     {age, Age} = stats:get(age, Stats2),
+    {maxage, MaxAge} = stats:get(maxage, Stats2),
+
     NewStats = stats:set([{energy, Energy - 1},{age, Age +1}], Stats2),
     if
 	Energy =< 1.0 ->
     	    {stop, normal, {Habitat, NewStats}};
+
+	Age >= MaxAge ->
+    	    {stop, normal, {Habitat, NewStats}};
+
     	true ->
     	    {noreply, {Habitat, NewStats}}
     end.

@@ -19,8 +19,8 @@ get_food(Animal, World) ->
 % Callbacks %
 
 init(_) ->
-    Stats = stats:set([{max_food, 100},
-		       {food_growth, 3},
+    Stats = stats:set([{max_food, 300},
+		       {food_growth, 12},
 		       {food, 50}
 		      ], stats:new()),
     {ok, Stats}.

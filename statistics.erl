@@ -1,5 +1,7 @@
 -module(statistics).
--export([mean/1, median/1, variance/1, variance/2, deviation/1, deviation/2]).
+-export([mean/1, median/1, variance/1, variance/2,
+	 deviation/1, deviation/2]).
+-include_lib("eunit/include/eunit.hrl").
 
 mean([]) -> 0;
 mean(L) ->
@@ -31,3 +33,26 @@ deviation(L) ->
 
 deviation(L, E) ->
     math:sqrt(variance(L, E)).
+
+
+%% Tests %%
+
+mean_test_() ->
+    Values = [{0, []},
+	      {5.0, [5]},
+	      {4.0, [4, 4]},
+	      {5.0, [10, 0, 5]},
+	      {5.0, [10, 0, 10, 0]},
+	      {-2.5, [-10, 5]} ],
+     [?_assertEqual(Correct, mean(List)) || {Correct, List} <- Values].
+
+median_test_() ->
+    Values = [{0, []},
+	      {5, [5]},
+	      {4.0, [4, 4]},
+	      {5, [10, 0, 5]},
+	      {-10, [-20, -10, 25]},
+	      {50.0, [0, 25, 75, 100]} ],
+
+    [?_assertEqual(Correct, median(List)) || {Correct, List} <- Values].
+

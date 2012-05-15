@@ -1,6 +1,6 @@
 -module(habitat).
 -export([start/1, create_animal/1, create_animal/2, get_food/2,
-	 list/1, step/1, step/2, random/2, random/3]).
+	 list/1, world/1, step/1, step/2, random/2, random/3]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).
 
@@ -19,6 +19,9 @@ get_food(Animal, Name) ->
 
 list(Name) ->
     gen_server:call(Name, list).
+
+world(Name) ->
+    gen_server:call(Name, world).
 
 step(Name) ->
     gen_server:cast(Name, step).
@@ -57,6 +60,10 @@ handle_cast({create, Stats, Habitat}, {World, Animals}) ->
 
 handle_call(list, _From, S = {_World, Animals}) ->
     Reply = [ platypus:get_stats(Name) || Name <- Animals ],
+    {reply, Reply, S};
+
+handle_call(world, _From, S = {World, _Animals}) ->
+    Reply = world:list(World),
     {reply, Reply, S};
 
 handle_call({get_food, Animal}, _From, S = {World, _Animals}) ->

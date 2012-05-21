@@ -15,7 +15,7 @@ looper(Pid) ->
 	"quit\n" ->
 	    ok;
         "\n" ->
-	    Habitat:step(Pid),%% skicka meddelande till habitatet om ett step
+	    habitat:step(Pid),%% skicka meddelande till habitatet om ett step
 	    looper(Pid);
 	"print\n" ->
 	    ok;
@@ -28,6 +28,6 @@ looper(Pid) ->
 makeManySteps(0 , _) ->
     ok;
 makeManySteps(N , Pid) when N > 0 ->
-    Habitat:step(Pid), %% skicka meddelande till habitatet om ett step
+    habitat:step(Pid), %% skicka meddelande till habitatet om ett step
     makeManySteps(N-1 , Pid).
 	    

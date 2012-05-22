@@ -1,6 +1,6 @@
 -module(statistics).
 -export([mean/1, median/1, variance/1, variance/2,
-	 deviation/1, deviation/2]).
+	 deviation/1, deviation/2, meanAndDev/1]).
 -include_lib("eunit/include/eunit.hrl").
 
 mean([]) -> 0;
@@ -34,6 +34,10 @@ deviation(L) ->
 deviation(L, E) ->
     math:sqrt(variance(L, E)).
 
+meanAndDev(L) ->
+    Mean = mean(L),
+    Dev = deviation(L, Mean),
+    {Mean, Dev}.
 
 %% Tests %%
 

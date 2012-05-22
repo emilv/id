@@ -1,5 +1,5 @@
 -module(platypus).
--export([start/1, start/2, step/1, get_stats/1]).
+-export([start/1, start/2, step/1, get_stats/1, get_action/2]).
 -export([init/1, handle_cast/2, handle_call/3, terminate/2]).
 -behavior(gen_server).
 
@@ -25,7 +25,7 @@ step(Name) ->
     gen_server:cast(Name, step).
 
 get_stats(Name) ->
-    gen_server:call(Name, get_stats).
+    gen_server:call(Name, get_stats, 60000).
 
 % Internal functions
 
@@ -53,6 +53,10 @@ normalize_actions(#actions{reproduce = Reproduce,
     F = 100 / (Reproduce + GetFood),
     #actions{reproduce = Reproduce * F,
 	     get_food  = GetFood   * F}.    
+
+get_action(get_food,  #actions{get_food  = R}) -> R;
+get_action(reproduce, #actions{reproduce = R}) -> R.
+    
 
 mutate(Stats, Habitat) ->
     {actions, A} = stats:get(actions, Stats),
@@ -100,7 +104,7 @@ handle_cast(step, {Habitat, Stats}) ->
 
     NewStats = stats:set([{energy, Energy - 1},{age, Age +1}], Stats2),
     if
-	Energy =< 1.0 ->
+	Energy =< 1 ->
     	    {stop, normal, {Habitat, NewStats}};
 
 	Age >= MaxAge ->

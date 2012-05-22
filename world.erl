@@ -11,16 +11,16 @@ step(World) ->
     gen_server:cast(World, step).
 
 list(World) ->
-    gen_server:call(World, list).
+    gen_server:call(World, list, infinity).
 
 get_food(Animal, World) ->
-    gen_server:call(World, {get_food, Animal}).
+    gen_server:call(World, {get_food, Animal}, infinity).
 
 % Callbacks %
 
 init(_) ->
     Stats = stats:set([{max_food, 300},
-		       {food_growth, 12},
+		       {food_growth, 120},
 		       {food, 50}
 		      ], stats:new()),
     {ok, Stats}.

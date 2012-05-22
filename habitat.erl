@@ -15,13 +15,13 @@ create_animal(Stats, Name) ->
     gen_server:cast(Name, {create, Stats}).
 
 get_food(Animal, Name) ->
-    gen_server:call(Name, {get_food, Animal}).
+    gen_server:call(Name, {get_food, Animal}, infinity).
 
 list(Name) ->
-    gen_server:call(Name, list).
+    gen_server:call(Name, list, infinity).
 
 world(Name) ->
-    gen_server:call(Name, world).
+    gen_server:call(Name, world, infinity).
 
 step(Name) ->
     gen_server:cast(Name, step).

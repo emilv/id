@@ -51,10 +51,10 @@ printStatistics(Pid) ->
     {food, Food} = stats:get(food, habitat:world(Pid)),
     io:format("~nWorld food:\t~p~n"
 	      "Count:\t~p~n"
-	      "Get food:\t~p % (deviation: ~p)~n"
-	      "Reproduce:\t~p % (deviation: ~p)~n"
-	      "Energy:\t~p (deviation: ~p)~n"
-	      "Age:\t~p (deviation: ~p)~n"
+	      "Get food:\t~.2f % (deviation: ~.1f)~n"
+	      "Reproduce:\t~.2f % (deviation: ~.1f)~n"
+	      "Energy:\t~.2f (deviation: ~.1f)~n"
+	      "Age:\t~.2f (deviation: ~.1f)~n"
 	      , [Food, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_dev,
 		 S#statistics.reprod_mean, S#statistics.reprod_dev,

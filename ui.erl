@@ -16,7 +16,7 @@
 
 
 start() ->
-    Animals = element(2,io:read("Ange antal djur: ")),
+    Animals = element(2,io:read("Number of animals: ")),
     PidForHabitat = habitat:start(Animals),
     io:format("Type 'help' for command list.\n"),
     looper(PidForHabitat),
@@ -33,30 +33,31 @@ looper(Pid) ->
 	    ok;
         "\n" ->
 	    habitat:step(Pid),%% skicka meddelande till habitatet om ett step
-	    looper(Pid);
-	"print\n" ->
 	    printStatistics(Pid),
 	    looper(Pid);
 	X ->
   	    makeManySteps(element(1,string:to_integer(X)), Pid),
+	    printStatistics(Pid),
   	    looper(Pid)
     end.
 
 
-makeManySteps(0 , _) ->
-    ok;
-makeManySteps(N , Pid) when N > 0 ->
-    habitat:step(Pid), %% skicka meddelande till habitatet om ett step
-    makeManySteps(N-1 , Pid).
+makeManySteps(N, Pid) when N > 0 ->
+    habitat:step(Pid, N).
+
 
 printStatistics(Pid) ->
     S = getStatistics(Pid),
-    io:format("Count:\t~p~n"
-	      "Get food:\t~p %~n"
-	      "Reproduce:\t~p %~n"
+    io:format("~nCount:\t~p~n"
+	      "Get food:\t~p % (deviation: ~p)~n"
+	      "Reproduce:\t~p % (deviation: ~p)~n"
+	      "Energy:\t~p (deviation: ~p)~n"
+	      "Age:\t~p (deviation: ~p)~n"
 	      , [S#statistics.animals,
-		 S#statistics.get_food_mean,
-		 S#statistics.reprod_mean
+		 S#statistics.get_food_mean, S#statistics.get_food_dev,
+		 S#statistics.reprod_mean, S#statistics.reprod_dev,
+		 S#statistics.energy_mean, S#statistics.energy_dev,
+		 S#statistics.age_mean, S#statistics.age_dev
 		]
 	     ).
 
@@ -64,19 +65,20 @@ printStatistics(Pid) ->
 getStatistics(Pid) ->
     L = habitat:list(Pid),
     Len = length(L),
-    io:format("~p", [stats(get_food, L)]),
     {FoodMean, FoodDev} = statistics:meanAndDev(stats(get_food, L)),
     {ReMean, ReDev} = statistics:meanAndDev(stats(reproduce, L)),
+    {EnergyMean, EnergyDev} = statistics:meanAndDev(stats(energy, L)),
+    {AgeMean, AgeDev} = statistics:meanAndDev(stats(age, L)),
     #statistics{animals       = Len,
 		get_food_mean = FoodMean,
 		get_food_dev  = FoodDev,
 		reprod_mean   = ReMean, 
 		reprod_dev    = ReDev,
-		energy_mean   = null,
-		energy_dev    = null,
-		age_mean      = null,
+		energy_mean   = EnergyMean,
+		energy_dev    = EnergyDev,
+		age_mean      = AgeMean,
 		age_median    = null,
-		age_dev       = null
+		age_dev       = AgeDev
 	       }.
 
 stats(get_food, L) ->

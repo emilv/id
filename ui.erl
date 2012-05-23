@@ -3,12 +3,17 @@
 
 -record(statistics, {
 	  animals,
+	  food,
 	  get_food_mean,
 	  get_food_dev,
 	  reprod_mean,
 	  reprod_dev,
 	  fight_mean,
 	  fight_dev,
+	  attack_mean,
+	  attack_dev,
+	  defence_mean,
+	  defence_dev,
 	  energy_mean,
 	  energy_dev,
 	  age_mean,
@@ -52,19 +57,22 @@ makeManySteps(N, Pid) when N > 0 ->
 
 printStatistics(Pid) ->
     S = getStatistics(Pid),
-    {food, Food} = stats:get(food, habitat:world(Pid)),
     io:format("~nWorld food:\t~p~n"
 	      "Count:\t~p~n"
 	      "Get food:\t~.2f % (deviation: ~.1f)~n"
 	      "Reproduce:\t~.2f % (deviation: ~.1f)~n"
 	      "Fight:\t~.2f % (deviation: ~.1f)~n"
+	      "Attack:\t~.2f (deviation: ~.1f)~n"
+	      "Defence:\t~.2f (deviation: ~.1f)~n"
 	      "Energy:\t~.2f (deviation: ~.1f)~n"
 	      "Age:\t~.2f (deviation: ~.1f)~n"
 	      "Max age:\t~.2f (deviation: ~.1f)~n"
-	      , [Food, S#statistics.animals,
+	      , [S#statistics.food, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_dev,
 		 S#statistics.reprod_mean, S#statistics.reprod_dev,
 		 S#statistics.fight_mean, S#statistics.fight_dev,
+		 S#statistics.attack_mean, S#statistics.attack_dev,
+		 S#statistics.defence_mean, S#statistics.defence_dev,
 		 S#statistics.energy_mean, S#statistics.energy_dev,
 		 S#statistics.age_mean, S#statistics.age_dev,
 		 S#statistics.maxage_mean, S#statistics.maxage_dev
@@ -75,19 +83,27 @@ printStatistics(Pid) ->
 getStatistics(Pid) ->
     L = habitat:list(Pid),
     Len = length(L),
+    {food, Food} = stats:get(food, habitat:world(Pid)),
     {FoodMean, FoodDev} = statistics:meanAndDev(stats(get_food, L)),
     {ReMean, ReDev} = statistics:meanAndDev(stats(reproduce, L)),
     {FightMean, FightDev} = statistics:meanAndDev(stats(fight, L)),
+    {AttackMean, AttackDev} = statistics:meanAndDev(stats(attack, L)),
+    {DefenceMean, DefenceDev} = statistics:meanAndDev(stats(defence, L)),
     {EnergyMean, EnergyDev} = statistics:meanAndDev(stats(energy, L)),
     {AgeMean, AgeDev} = statistics:meanAndDev(stats(age, L)),
     {MaxAgeMean, MaxAgeDev} = statistics:meanAndDev(stats(maxage, L)),
     #statistics{animals       = Len,
+		food          = Food,
 		get_food_mean = FoodMean,
 		get_food_dev  = FoodDev,
 		reprod_mean   = ReMean, 
 		reprod_dev    = ReDev,
 		fight_mean    = FightMean,
 		fight_dev     = FightDev,
+		attack_mean   = AttackMean,
+		attack_dev    = AttackDev,
+		defence_mean  = DefenceMean,
+		defence_dev   = DefenceDev,
 		energy_mean   = EnergyMean,
 		energy_dev    = EnergyDev,
 		age_mean      = AgeMean,

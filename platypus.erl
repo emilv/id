@@ -67,10 +67,10 @@ mutate(Stats) ->
     {actions, A} = stats:get(actions, Stats),
     R1 = random(-3, 3),
     R2 = random(-3, 3),
-    R3 = 0, %random(-1, 1) / 10,
+    R3 = random(-1, 1) / 10,
     NewA = normalize_actions(#actions{reproduce = A#actions.reproduce + R1,
 				      get_food  = A#actions.get_food  + R2}),
-    M = stats:get(maxage, Stats),
+    {maxage, M} = stats:get(maxage, Stats),
     Stats2 = stats:set(maxage, M + R3, Stats), 
     stats:set(actions, NewA, Stats2).
 

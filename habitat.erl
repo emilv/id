@@ -30,7 +30,7 @@ world(Name) ->
     gen_server:call(Name, world, infinity).
 
 step(Name) ->
-    gen_server:call(Name, step).
+    gen_server:call(Name, step, infinity).
 
 step(Name, N) ->
     [step(Name) || _ <- lists:seq(1,N)].

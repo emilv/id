@@ -4,16 +4,17 @@
 -behavior(gen_server).
 
 -record(actions, {reproduce = 20,
-		  get_food = 80,
+		  get_food = 20,
 		  fight = 0
 		 }).
 
 %% API %%
 
 start(Habitat, World) ->
+    Actions = #actions{},
     start(
       stats:set([{energy, 10},
-		 {actions, #actions{}},
+		 {actions, normalize_actions(Actions)},
 		 {age, 0},
 		 {maxage, 10},
 		 {defence, 10},

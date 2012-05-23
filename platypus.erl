@@ -42,7 +42,7 @@ attack(Name, Power) ->
 		    {win, Result};
 		{lose, Name, Result} ->
 		    {lose, Result}
-	    after 200 ->
+	    after 10 ->
 		    false
 	    end;
 	true ->
@@ -139,12 +139,9 @@ get_food(Stats, World) ->
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
 
-survive(Stats, WT) ->
+temperature_loss(Stats, WT) ->
     {temperature, T} = stats:get(temperature, Stats),
-    {energy, E} = stats:get(energy, Stats),
-    NewEnergy = E - abs(T-WT)/3,
-    NewStats = stats:set(energy, NewEnergy, Stats),
-    NewStats.
+    abs(T-WT)/3.
 
 fight(Stats, Opponent) ->
     {energy, Energy} = stats:get(energy, Stats),
@@ -185,13 +182,13 @@ handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
     {maxage, MaxAge} = stats:get(maxage, Stats2),
     {defence, Def} = stats:get(defence, Stats2),
     {attack, Atk} = stats:get(attack, Stats2),
-
-    Stats3 = survive(Stats2, Temperature),
     
-    NewEnergy = Energy - trunc((Def + Atk) / 10),
+    NewEnergy = Energy -
+	trunc((Def + Atk) / 10) -
+	temperature_loss(Stats2, Temperature),
     NewStats = stats:set([{energy, NewEnergy},
 			  {age, Age + 1}],
-			 Stats3),
+			 Stats2),
     if
 	NewEnergy =< 0 ->
 	    habitat:remove_animal(self(), Habitat),

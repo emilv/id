@@ -57,16 +57,16 @@ makeManySteps(N, Pid) when N > 0 ->
 
 printStatistics(Pid) ->
     S = getStatistics(Pid),
-    io:format("~nWorld food:\t~p~n"
-	      "Count:\t~p~n"
-	      "Get food:\t~.2f % (deviation: ~.1f)~n"
-	      "Reproduce:\t~.2f % (deviation: ~.1f)~n"
-	      "Fight:\t~.2f % (deviation: ~.1f)~n"
-	      "Attack:\t~.2f (deviation: ~.1f)~n"
-	      "Defence:\t~.2f (deviation: ~.1f)~n"
-	      "Energy:\t~.2f (deviation: ~.1f)~n"
-	      "Age:\t~.2f (deviation: ~.1f)~n"
-	      "Max age:\t~.2f (deviation: ~.1f)~n"
+    io:format("~nWorld food: ~p~n"
+	      "Count:        ~p~n"
+	      "Get food:     ~.2f % (deviation: ~.1f)~n"
+	      "Reproduce:    ~.2f % (deviation: ~.1f)~n"
+	      "Fight:        ~.2f % (deviation: ~.1f)~n"
+	      "Attack:       ~.2f (deviation: ~.1f)~n"
+	      "Defence:      ~.2f (deviation: ~.1f)~n"
+	      "Energy:       ~.2f (deviation: ~.1f)~n"
+	      "Age:          ~.2f (deviation: ~.1f)~n"
+	      "Max age:      ~.2f (deviation: ~.1f)~n"
 	      , [S#statistics.food, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_dev,
 		 S#statistics.reprod_mean, S#statistics.reprod_dev,

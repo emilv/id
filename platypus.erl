@@ -31,6 +31,10 @@ get_stats(Name) ->
 % Internal functions
 
 act(Stats, Habitat, World) ->
+
+    %% Sleep for better scheduling mix
+    timer:sleep(random(1, 4)),
+
     Random = random(1, 100),
     {actions, Actions} = stats:get(actions, Stats),
 
@@ -111,17 +115,20 @@ handle_cast(step, {Habitat, Stats, World}) ->
     {maxage, MaxAge} = stats:get(maxage, Stats2),
 
     NewStats = stats:set([{energy, Energy - 1},{age, Age +1}], Stats2),
-    Habitat ! done,
     if
 	Energy =< 1 ->
-    	    {stop, normal, {Habitat, NewStats, World}};
+	    habitat:remove_animal(self(), Habitat),
+    	    Status = {stop, normal, {Habitat, NewStats, World}};
 
 	Age >= MaxAge ->
-    	    {stop, normal, {Habitat, NewStats, World}};
+	    habitat:remove_animal(self(), Habitat),
+    	    Status = {stop, normal, {Habitat, NewStats, World}};
 
     	true ->
-    	    {noreply, {Habitat, NewStats, World}}
-    end.
+    	    Status = {noreply, {Habitat, NewStats, World}}
+    end,
+    Habitat ! done,
+    Status.
 
 handle_call(get_stats, _From, S = {_Habitat, Stats, _World}) ->
     {reply, Stats, S}.

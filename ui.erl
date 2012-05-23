@@ -11,7 +11,9 @@
 	  energy_dev,
 	  age_mean,
 	  age_median,
-	  age_dev
+	  age_dev,
+	  maxage_mean,
+	  maxage_dev
 	 }).
 
 
@@ -55,11 +57,13 @@ printStatistics(Pid) ->
 	      "Reproduce:\t~.2f % (deviation: ~.1f)~n"
 	      "Energy:\t~.2f (deviation: ~.1f)~n"
 	      "Age:\t~.2f (deviation: ~.1f)~n"
+	      "Max age:\t~.2f (deviation: ~.1f)~n"
 	      , [Food, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_dev,
 		 S#statistics.reprod_mean, S#statistics.reprod_dev,
 		 S#statistics.energy_mean, S#statistics.energy_dev,
-		 S#statistics.age_mean, S#statistics.age_dev
+		 S#statistics.age_mean, S#statistics.age_dev,
+		 S#statistics.maxage_mean, S#statistics.maxage_dev
 		]
 	     ).
 
@@ -71,6 +75,7 @@ getStatistics(Pid) ->
     {ReMean, ReDev} = statistics:meanAndDev(stats(reproduce, L)),
     {EnergyMean, EnergyDev} = statistics:meanAndDev(stats(energy, L)),
     {AgeMean, AgeDev} = statistics:meanAndDev(stats(age, L)),
+    {MaxAgeMean, MaxAgeDev} = statistics:meanAndDev(stats(maxage, L)),
     #statistics{animals       = Len,
 		get_food_mean = FoodMean,
 		get_food_dev  = FoodDev,
@@ -80,7 +85,9 @@ getStatistics(Pid) ->
 		energy_dev    = EnergyDev,
 		age_mean      = AgeMean,
 		age_median    = null,
-		age_dev       = AgeDev
+		age_dev       = AgeDev,
+		maxage_mean   = MaxAgeMean,
+		maxage_dev    = MaxAgeDev
 	       }.
 
 stats(get_food, L) ->

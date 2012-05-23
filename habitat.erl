@@ -17,6 +17,9 @@ create_animal(Stats, Name) ->
 remove_animal(Pid, Name) ->
     gen_server:cast(Name, {remove, Pid}).
 
+random_animal(Name) ->
+    gen_server:call(Name, random_animal).
+
 get_food(Animal, Name) ->
     gen_server:call(Name, {get_food, Animal}, infinity).
 
@@ -45,6 +48,7 @@ wait(N) ->
 
 init(N) ->
     process_flag(trap_exit, true),
+    random:seed(now()),
     World = world:start(),
     Animals = [ platypus:start(self(), World) || _ <- lists:seq(1, N) ],
     {ok, {World, Animals}}.
@@ -67,6 +71,9 @@ handle_call(step, _From, S = {World, Animals}) ->
     [ platypus:step(Name) || Name <- Animals ],
     wait(length(Animals)), %% We don't need to wait for world
     {reply, ok, S};    
+
+handle_call(random_animal, _From, S = {_World, Animals}) ->
+    {reply, lists:nth(random:uniform(length(Animals)), Animals), S};
 
 handle_call(list, _From, S = {_World, Animals}) ->
     %%Alive = lists:filter(fun erlang:is_process_alive/1, Animals),

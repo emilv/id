@@ -16,12 +16,19 @@ list(World) ->
 get_food(Animal, World) ->
     gen_server:call(World, {get_food, Animal}, infinity).
 
+random(Min, Max) ->
+    Random = random:uniform(Max - Min + 1),
+    Random + Min - 1.
+
+
 % Callbacks %
 
 init(_) ->
+    random:seed(now()),
     Stats = stats:set([{max_food, 10000},
 		       {food_growth, 2200},
-		       {food, 500}
+		       {food, 500},
+		       {temperature, 20}
 		      ], stats:new()),
     {ok, Stats}.
 
@@ -29,9 +36,12 @@ handle_cast(step, Stats) ->
     {food_growth, Growth} = stats:get(food_growth, Stats),
     {food, Food} = stats:get(food, Stats),
     {max_food, MaxFood} = stats:get(max_food, Stats),
+    {temperature, T} = stats:get(temperature, Stats),
+    NewTemp = T + random(-1,1) + (20-T)/40,
     NewFood = min(MaxFood, Food + Growth),
-    NewStats = stats:set(food, NewFood, Stats),
-    {noreply, NewStats}.
+    NewStats = stats:set(temperature, NewTemp, Stats),
+    NewStats2 = stats:set(food, NewFood, NewStats),
+    {noreply, NewStats2}.
     
 handle_call(list, _From, Stats) ->
     {reply, Stats, Stats};

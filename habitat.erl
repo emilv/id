@@ -44,6 +44,15 @@ wait(N) ->
 	    wait(N-1)
     end.
 
+random_element(L, Not) ->
+    E = lists:nth(random:uniform(length(L)), L),
+    case E of
+	Not ->
+	    random_element(L, Not);
+	_ ->
+	    E
+    end.
+
 %% Callbacks %%
 
 init(N) ->
@@ -68,7 +77,7 @@ handle_cast({remove, Pid}, {World, Animals}) ->
 
 handle_call(step, _From, S = {World, Animals}) ->
     world:step(World),
-    [ platypus:step(Name) || Name <- Animals ],
+    [ platypus:step(Name, random_element(Animals, Name)) || Name <- Animals ],
     wait(length(Animals)), %% We don't need to wait for world
     {reply, ok, S};    
 

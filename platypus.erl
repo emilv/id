@@ -1,6 +1,6 @@
 -module(platypus).
--export([start/2, start/3, step/1, get_stats/1, get_action/2, attack/2]).
--export([init/1, handle_cast/2, handle_call/3, terminate/2]).
+-export([start/2, start/3, step/2, get_stats/1, get_action/2, attack/2]).
+-export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 -behavior(gen_server).
 
 -record(actions, {reproduce = 20,
@@ -25,18 +25,32 @@ start(Stats, Habitat, World) ->
     {ok, Pid} = gen_server:start_link(?MODULE, {Habitat, Stats, World}, []),
     Pid.
 
-step(Name) ->
-    gen_server:cast(Name, step).
+step(Name, Opponent) ->
+    gen_server:cast(Name, {step, Opponent}).
 
 get_stats(Name) ->
     gen_server:call(Name, get_stats).
 
 attack(Name, Power) ->
-    gen_server:call(Name, {fight, Power}).
+    Alive = is_process_alive(Name),
+    if
+	Alive ->
+	    gen_server:cast(Name, {fight, self(), Power}),
+	    receive
+		{win, Name, Result} ->
+		    {win, Result};
+		{lose, Name, Result} ->
+		    {lose, Result}
+	    after 1000 ->
+		    false
+	    end;
+	true ->
+	    false
+    end.
 
 % Internal functions
 
-act(Stats, Habitat, World) ->
+act(Stats, Habitat, World, Opponent) ->
 
     %% Sleep for better scheduling mix
     timer:sleep(random(1, 4)),
@@ -56,7 +70,7 @@ act(Stats, Habitat, World) ->
     	Random < GetFood + Reproduce ->
     	    get_food(Stats, World);
 	Random < GetFood + Reproduce + Fight ->
-	    fight(Stats, Habitat);
+	    fight(Stats, Opponent);
 	true ->
 	    Stats
     end.
@@ -114,16 +128,17 @@ get_food(Stats, World) ->
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
 
-fight(Stats, Habitat) ->
+fight(Stats, Opponent) ->
     {energy, Energy} = stats:get(energy, Stats),
     {attack, Attack} = stats:get(attack, Stats),
-    Power = random(0, Attack),
-    Prey = habitat:random_animal(Habitat),
-    case platypus:attack(Prey, Power) of
+    Power = random(0, trunc(Attack)),
+    case platypus:attack(Opponent, Power) of
 	{win, Food} ->
 	    NewEnergy = Energy + Food;
 	{lose, Injury} ->
-	    NewEnergy = Energy - Injury
+	    NewEnergy = Energy - Injury;
+	false ->
+	    NewEnergy = Energy
     end,
     stats:set(energy, NewEnergy, Stats).
 	
@@ -141,9 +156,9 @@ init(State) ->
 terminate(_Reason, _LoopData) ->
     ok.
 
-handle_cast(step, {Habitat, Stats, World}) ->
+handle_cast({step, Opponent}, {Habitat, Stats, World}) ->
 
-    Stats2 = lists:foldr(fun (_, Acc) -> act(Acc, Habitat, World) end,
+    Stats2 = lists:foldr(fun (_, Acc) -> act(Acc, Habitat, World, Opponent) end,
 			 Stats,
 			 lists:seq(1, 10)),
 
@@ -171,19 +186,25 @@ handle_cast(step, {Habitat, Stats, World}) ->
     	    Status = {noreply, {Habitat, NewStats, World}}
     end,
     Habitat ! done,
-    Status.
+    Status;
 
-handle_call({fight, Power}, _From, S = {_Habitat, Stats, _World}) ->
+handle_cast({fight, From, Power}, S = {_Habitat, Stats, _World}) ->
     {defence, Defence} = stats:get(defence, Stats),
-    Protection = random(0, Defence),
+    Protection = random(0, trunc(Defence)),
     case Power - Protection of
 	N when N > 0 -> % I lost
 	    {energy, Energy} = stats:get(energy, Stats),
-	    {stop, normal, {win, Energy}, S};
+	    From ! {win, self(), Energy};
 	N when N =< 0 -> % I won
-	    {reply, {lose, N}, S}
-    end;
+	    From ! {lose, self(), -N}
+    end,
+    {noreply, S}.
 
 handle_call(get_stats, _From, S = {_Habitat, Stats, _World}) ->
     {reply, Stats, S}.
 
+
+handle_info({win, _, _}, S) ->
+    {noreply, S};
+handle_info({lose, _, _}, S) ->
+    {noreply, S}.

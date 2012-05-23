@@ -17,7 +17,8 @@ start(Habitat, World) ->
 		 {age, 0},
 		 {maxage, 10},
 		 {defence, 10},
-		 {attack, 10}
+		 {attack, 10},
+		 {temperature, 20}
 		],
 		stats:new()), Habitat, World).
 
@@ -131,6 +132,14 @@ reproduce(Stats, Habitat) ->
 get_food(Stats, World) ->
     {energy, Energy} = stats:get(energy, Stats),
     NewEnergy = min(10, Energy + world:get_food(self(), World)),
+    NewStats = stats:set(energy, NewEnergy, Stats),
+    NewStats.
+
+survive(Stats, World) ->
+    {temperature, T} = stats:get(temperature, Stats),
+    {energy, E} = stats:get(energy, Stats),
+    {temperature, WT} = world:get_temperature(self(), World),
+    NewEnergy = E - abs(T-WT)/3,
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
 

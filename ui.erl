@@ -7,6 +7,8 @@
 	  get_food_dev,
 	  reprod_mean,
 	  reprod_dev,
+	  fight_mean,
+	  fight_dev,
 	  energy_mean,
 	  energy_dev,
 	  age_mean,
@@ -55,12 +57,14 @@ printStatistics(Pid) ->
 	      "Count:\t~p~n"
 	      "Get food:\t~.2f % (deviation: ~.1f)~n"
 	      "Reproduce:\t~.2f % (deviation: ~.1f)~n"
+	      "Fight:\t~.2f % (deviation: ~.1f)~n"
 	      "Energy:\t~.2f (deviation: ~.1f)~n"
 	      "Age:\t~.2f (deviation: ~.1f)~n"
 	      "Max age:\t~.2f (deviation: ~.1f)~n"
 	      , [Food, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_dev,
 		 S#statistics.reprod_mean, S#statistics.reprod_dev,
+		 S#statistics.fight_mean, S#statistics.fight_dev,
 		 S#statistics.energy_mean, S#statistics.energy_dev,
 		 S#statistics.age_mean, S#statistics.age_dev,
 		 S#statistics.maxage_mean, S#statistics.maxage_dev
@@ -73,6 +77,7 @@ getStatistics(Pid) ->
     Len = length(L),
     {FoodMean, FoodDev} = statistics:meanAndDev(stats(get_food, L)),
     {ReMean, ReDev} = statistics:meanAndDev(stats(reproduce, L)),
+    {FightMean, FightDev} = statistics:meanAndDev(stats(fight, L)),
     {EnergyMean, EnergyDev} = statistics:meanAndDev(stats(energy, L)),
     {AgeMean, AgeDev} = statistics:meanAndDev(stats(age, L)),
     {MaxAgeMean, MaxAgeDev} = statistics:meanAndDev(stats(maxage, L)),
@@ -81,6 +86,8 @@ getStatistics(Pid) ->
 		get_food_dev  = FoodDev,
 		reprod_mean   = ReMean, 
 		reprod_dev    = ReDev,
+		fight_mean    = FightMean,
+		fight_dev     = FightDev,
 		energy_mean   = EnergyMean,
 		energy_dev    = EnergyDev,
 		age_mean      = AgeMean,
@@ -90,10 +97,8 @@ getStatistics(Pid) ->
 		maxage_dev    = MaxAgeDev
 	       }.
 
-stats(get_food, L) ->
-    lists:map(fun(E) -> platypus:get_action(get_food, E) end, stats(actions, L));
-stats(reproduce, L) ->
-    lists:map(fun(E) -> platypus:get_action(reproduce, E) end, stats(actions, L));
+stats(A, L) when A == get_food; A == reproduce; A == fight ->
+    lists:map(fun(E) -> platypus:get_action(A, E) end, stats(actions, L));
 stats(Key, L) ->
     lists:map(fun(E) -> {_, R} = stats:get(Key, E), R end, L).
 

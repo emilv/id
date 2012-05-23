@@ -84,6 +84,11 @@ normalize_actions(#actions{reproduce = Reproduce,
 	     get_food  = GetFood   * F,
 	     fight     = Fight     * F}.
 
+or_zero(N) when N < 0 ->
+    0;
+or_zero(N) ->
+    N.
+
 get_action(get_food,  #actions{get_food  = R}) -> R;
 get_action(reproduce, #actions{reproduce = R}) -> R;
 get_action(fight,     #actions{fight     = R}) -> R.
@@ -92,17 +97,18 @@ get_action(fight,     #actions{fight     = R}) -> R.
 mutate(Stats) ->
     {actions, A} = stats:get(actions, Stats),
 
-    NewA = normalize_actions(#actions{reproduce = A#actions.reproduce + random(-3, 3),
-				      get_food  = A#actions.get_food  + random(-3, 3),
-				      fight     = A#actions.fight     + random(-3, 3)}),
+    NewA = normalize_actions(#actions{reproduce = or_zero(A#actions.reproduce + random(-3, 3)),
+				      get_food  = or_zero(A#actions.get_food  + random(-3, 3)),
+				      fight     = or_zero(A#actions.fight     + random(-3, 3))}),
+
     {maxage, M} = stats:get(maxage, Stats),
-    NewMaxAge = M + (random(-1, 1)/10),
+    NewMaxAge = or_zero(M + (random(-1, 1)/10)),
 
     {attack, Atk} = stats:get(attack, Stats),
-    NewAttack = Atk + random(-3, 3),
+    NewAttack = or_zero(Atk + random(-3, 3)),
     
     {defence, Def} = stats:get(defence, Stats),
-    NewDefence = Def + random(-3, 3),
+    NewDefence = or_zero(Def + random(-3, 3)),
 
     stats:set([{actions, NewA},
 	       {maxage, NewMaxAge},
@@ -143,7 +149,7 @@ fight(Stats, Opponent) ->
     stats:set(energy, NewEnergy, Stats).
 	
 
-random(Min, Max) ->
+random(Min, Max) when Max >= Min ->
     Random = random:uniform(Max - Min + 1),
     Random + Min - 1.
 

@@ -4,7 +4,7 @@
 -behavior(gen_server).
 
 -record(actions, {reproduce = 20,
-		  get_food = 20,
+		  get_food = 80,
 		  fight = 0
 		 }).
 
@@ -19,7 +19,8 @@ start(Habitat, World) ->
 		 {maxage, 10},
 		 {defence, 10},
 		 {attack, 10},
-		 {temperature, 20}
+		 {temperature, 20},
+		 {alive, true}
 		],
 		stats:new()), Habitat, World).
 
@@ -64,17 +65,29 @@ act(Stats, Habitat, World, Opponent) ->
     GetFood   = Actions#actions.get_food,
     Fight     = Actions#actions.fight,
 
+    {energy, E} = stats:get(energy, Stats),
     if
-    	Random < Reproduce ->
-    	    reproduce(Stats, Habitat),
- 	    {energy, Energy} = stats:get(energy, Stats),
-	    NewStats = stats:set(energy, Energy-2, Stats);
-    	Random < GetFood + Reproduce ->
-    	    get_food(Stats, World);
-	Random < GetFood + Reproduce + Fight ->
-	    fight(Stats, Opponent);
+	E > 0 ->
+	    Stats2 = Stats;
 	true ->
-	    Stats
+	    Stats2 = stats:set(alive, false, Stats)
+    end,
+
+    {alive, Alive} = stats:get(alive, Stats),
+
+    if
+	Alive == false ->
+	    Stats2;
+    	Random < Reproduce ->
+    	    reproduce(Stats2, Habitat),
+ 	    {energy, Energy} = stats:get(energy, Stats2),
+	    NewStats = stats:set(energy, Energy-2, Stats2);
+    	Random < GetFood + Reproduce ->
+    	    get_food(Stats2, World);
+	Random < GetFood + Reproduce + Fight ->
+	    fight(Stats2, Opponent);
+	true ->
+	    Stats2
     end.
 
 normalize_actions(#actions{reproduce = Reproduce,
@@ -156,7 +169,11 @@ fight(Stats, Opponent) ->
 	false ->
 	    NewEnergy = Energy
     end,
-    stats:set(energy, NewEnergy, Stats).
+    if NewEnergy > 0 ->
+	    stats:set(energy, NewEnergy, Stats);
+       true ->
+	    stats:set(alive, false, Stats)
+    end.
 	
 
 random(Min, Max) when Max >= Min ->
@@ -183,6 +200,7 @@ handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
     {maxage, MaxAge} = stats:get(maxage, Stats2),
     {defence, Def} = stats:get(defence, Stats2),
     {attack, Atk} = stats:get(attack, Stats2),
+    {alive, Alive} = stats:get(alive, Stats2),
     
     NewEnergy = Energy -
 	trunc((Def + Atk) / 10) -
@@ -198,7 +216,11 @@ handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
 	Age >= MaxAge ->
 	    habitat:remove_animal(self(), Habitat),
     	    Status = {stop, normal, {Habitat, NewStats, World}};
-
+	
+	Alive == false ->
+	    habitat:remove_animal(self(), Habitat),
+    	    Status = {stop, normal, {Habitat, NewStats, World}};
+	
     	true ->
     	    Status = {noreply, {Habitat, NewStats, World}}
     end,

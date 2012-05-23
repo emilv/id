@@ -1,5 +1,5 @@
 -module(platypus).
--export([start/2, start/3, step/2, get_stats/1, get_action/2, attack/2]).
+-export([start/2, start/3, step/3, get_stats/1, get_action/2, attack/2]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 -behavior(gen_server).
 
@@ -26,8 +26,8 @@ start(Stats, Habitat, World) ->
     {ok, Pid} = gen_server:start_link(?MODULE, {Habitat, Stats, World}, []),
     Pid.
 
-step(Name, Opponent) ->
-    gen_server:cast(Name, {step, Opponent}).
+step(Name, Opponent, Temperature) ->
+    gen_server:cast(Name, {step, Opponent, Temperature}).
 
 get_stats(Name) ->
     gen_server:call(Name, get_stats).
@@ -42,7 +42,7 @@ attack(Name, Power) ->
 		    {win, Result};
 		{lose, Name, Result} ->
 		    {lose, Result}
-	    after 1000 ->
+	    after 200 ->
 		    false
 	    end;
 	true ->
@@ -111,10 +111,14 @@ mutate(Stats) ->
     {defence, Def} = stats:get(defence, Stats),
     NewDefence = or_zero(Def + random(-3, 3)),
 
+    {temperature, Temp} = stats:get(temperature, Stats),
+    NewTemp = Temp + random(-1, 1),
+
     stats:set([{actions, NewA},
 	       {maxage, NewMaxAge},
 	       {attack, NewAttack},
-	       {defence, NewDefence}
+	       {defence, NewDefence},
+	       {temperature, NewTemp}
 	       ], Stats).
 
 reproduce(Stats, Habitat) ->
@@ -135,10 +139,9 @@ get_food(Stats, World) ->
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
 
-survive(Stats, World) ->
+survive(Stats, WT) ->
     {temperature, T} = stats:get(temperature, Stats),
     {energy, E} = stats:get(energy, Stats),
-    {temperature, WT} = world:get_temperature(self(), World),
     NewEnergy = E - abs(T-WT)/3,
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
@@ -171,7 +174,7 @@ init(State) ->
 terminate(_Reason, _LoopData) ->
     ok.
 
-handle_cast({step, Opponent}, {Habitat, Stats, World}) ->
+handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
 
     Stats2 = lists:foldr(fun (_, Acc) -> act(Acc, Habitat, World, Opponent) end,
 			 Stats,
@@ -182,12 +185,13 @@ handle_cast({step, Opponent}, {Habitat, Stats, World}) ->
     {maxage, MaxAge} = stats:get(maxage, Stats2),
     {defence, Def} = stats:get(defence, Stats2),
     {attack, Atk} = stats:get(attack, Stats2),
+
+    Stats3 = survive(Stats2, Temperature),
     
     NewEnergy = Energy - trunc((Def + Atk) / 10),
-
     NewStats = stats:set([{energy, NewEnergy},
 			  {age, Age + 1}],
-			 Stats2),
+			 Stats3),
     if
 	NewEnergy =< 0 ->
 	    habitat:remove_animal(self(), Habitat),

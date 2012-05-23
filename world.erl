@@ -1,5 +1,5 @@
 -module(world).
--export([start/0, get_food/2, step/1, list/1]).
+-export([start/0, get_food/2, get_temperature/1, step/1, list/1]).
 -export([init/1, handle_cast/2, handle_call/3]).
 -behavior(gen_server).
 
@@ -15,6 +15,9 @@ list(World) ->
 
 get_food(Animal, World) ->
     gen_server:call(World, {get_food, Animal}, infinity).
+
+get_temperature(World) ->
+    gen_server:call(World, get_temperature, infinity).
 
 random(Min, Max) ->
     Random = random:uniform(Max - Min + 1),
@@ -45,6 +48,10 @@ handle_cast(step, Stats) ->
     
 handle_call(list, _From, Stats) ->
     {reply, Stats, Stats};
+
+handle_call(get_temperature, _From, Stats) ->
+    {temperature, Temp} = stats:get(temperature, Stats),
+    {reply, Temp, Stats};
 
 handle_call({get_food, _Animal}, _From, Stats) ->
     case stats:get(food, Stats) of

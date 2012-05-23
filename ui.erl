@@ -4,6 +4,7 @@
 -record(statistics, {
 	  animals,
 	  food,
+	  temperature,
 	  get_food_mean,
 	  get_food_dev,
 	  reprod_mean,
@@ -20,7 +21,9 @@
 	  age_median,
 	  age_dev,
 	  maxage_mean,
-	  maxage_dev
+	  maxage_dev,
+	  temp_mean,
+	  temp_dev
 	 }).
 
 
@@ -57,33 +60,44 @@ makeManySteps(N, Pid) when N > 0 ->
 
 printStatistics(Pid) ->
     S = getStatistics(Pid),
-    io:format("~nWorld food: ~p~n"
-	      "Count:        ~p~n"
-	      "Get food:     ~.2f % (deviation: ~.1f)~n"
-	      "Reproduce:    ~.2f % (deviation: ~.1f)~n"
-	      "Fight:        ~.2f % (deviation: ~.1f)~n"
-	      "Attack:       ~.2f (deviation: ~.1f)~n"
-	      "Defence:      ~.2f (deviation: ~.1f)~n"
-	      "Energy:       ~.2f (deviation: ~.1f)~n"
-	      "Age:          ~.2f (deviation: ~.1f)~n"
-	      "Max age:      ~.2f (deviation: ~.1f)~n"
-	      , [S#statistics.food, S#statistics.animals,
+    io:format("~n"
+	      "WORLD STATS:~n"
+	      "World food:   ~p~n"
+	      "World temp:   ~.1f~n"
+	      "Animal count: ~p~n"
+	      "ANIMAL STATS:~n"
+	      "Priorities:~n"
+	      "Get food:     ~.2f %\t(deviation: ~.1f)~n"
+	      "Reproduce:    ~.2f %\t(deviation: ~.1f)~n"
+	      "Fight:        ~.2f %\t(deviation: ~.1f)~n"
+	      "Physical properties:~n"
+	      "Attack:       ~.2f\t(deviation: ~.1f)~n"
+	      "Defence:      ~.2f\t(deviation: ~.1f)~n"
+	      "Temperature:  ~.1f\t(deviation: ~.1f)~n"
+	      "Max age:      ~.2f\t(deviation: ~.1f)~n"
+	      "Current status:~n"
+	      "Age:          ~.2f\t(deviation: ~.1f)~n"
+	      "Energy:       ~.2f\t(deviation: ~.1f)~n"
+	      , [S#statistics.food, S#statistics.temperature, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_dev,
 		 S#statistics.reprod_mean, S#statistics.reprod_dev,
 		 S#statistics.fight_mean, S#statistics.fight_dev,
 		 S#statistics.attack_mean, S#statistics.attack_dev,
 		 S#statistics.defence_mean, S#statistics.defence_dev,
-		 S#statistics.energy_mean, S#statistics.energy_dev,
+		 S#statistics.temp_mean, S#statistics.temp_dev,
+		 S#statistics.maxage_mean, S#statistics.maxage_dev,
 		 S#statistics.age_mean, S#statistics.age_dev,
-		 S#statistics.maxage_mean, S#statistics.maxage_dev
+		 S#statistics.energy_mean, S#statistics.energy_dev
 		]
 	     ).
 
 
 getStatistics(Pid) ->
     L = habitat:list(Pid),
+    World = habitat:world(Pid),
     Len = length(L),
-    {food, Food} = stats:get(food, habitat:world(Pid)),
+    {food, Food} = stats:get(food, World),
+    {temperature, Temperature} = stats:get(temperature, World),
     {FoodMean, FoodDev} = statistics:meanAndDev(stats(get_food, L)),
     {ReMean, ReDev} = statistics:meanAndDev(stats(reproduce, L)),
     {FightMean, FightDev} = statistics:meanAndDev(stats(fight, L)),
@@ -92,8 +106,10 @@ getStatistics(Pid) ->
     {EnergyMean, EnergyDev} = statistics:meanAndDev(stats(energy, L)),
     {AgeMean, AgeDev} = statistics:meanAndDev(stats(age, L)),
     {MaxAgeMean, MaxAgeDev} = statistics:meanAndDev(stats(maxage, L)),
+    {TempMean, TempDev} = statistics:meanAndDev(stats(temperature, L)),
     #statistics{animals       = Len,
 		food          = Food,
+		temperature   = Temperature,
 		get_food_mean = FoodMean,
 		get_food_dev  = FoodDev,
 		reprod_mean   = ReMean, 
@@ -110,7 +126,9 @@ getStatistics(Pid) ->
 		age_median    = null,
 		age_dev       = AgeDev,
 		maxage_mean   = MaxAgeMean,
-		maxage_dev    = MaxAgeDev
+		maxage_dev    = MaxAgeDev,
+		temp_mean     = TempMean,
+		temp_dev      = TempDev
 	       }.
 
 stats(A, L) when A == get_food; A == reproduce; A == fight ->

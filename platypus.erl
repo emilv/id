@@ -4,7 +4,7 @@
 -behavior(gen_server).
 
 -record(actions, {reproduce = 20,
-		  get_food = 80,
+		  get_food = 60,
 		  fight = 0
 		 }).
 
@@ -15,8 +15,8 @@ start(Habitat, World) ->
     start(
       stats:set([{energy, 10},
 		 {actions, normalize_actions(Actions)},
-		 {age, 0},
-		 {maxage, 10},
+		 {age, 4},
+		 {maxage, 20},
 		 {defence, 10},
 		 {attack, 10},
 		 {temperature, 20},
@@ -137,7 +137,13 @@ mutate(Stats) ->
 
 reproduce(Stats, Habitat) ->
     Random = random(1, 5),
+    {age, Age} = stats:get(age, Stats),
+    {maxage, Maxage} = stats:get(maxage, Stats),
     if
+	Age < Maxage / 10 ->
+	    false;
+	Age > 4* Maxage / 5 ->
+	    false;
 	Random == 1 ->
 	    NewS = mutate(Stats),
 	    {energy, Energy} = stats:get(energy, Stats),
@@ -155,7 +161,7 @@ get_food(Stats, World) ->
 
 temperature_loss(Stats, WT) ->
     {temperature, T} = stats:get(temperature, Stats),
-    abs(T-WT)/3.
+    abs(T-WT).
 
 fight(Stats, Opponent) ->
     {energy, Energy} = stats:get(energy, Stats),

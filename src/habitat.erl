@@ -64,7 +64,8 @@ wait(N) ->
 	    wait(N-1)
     end.
 
-%% @doc Välj ett slumpmässigt elemnt ur en lista
+%% @doc Välj ett slumpmässigt element ur en lista
+%%      Elementet får inte vara Not
 random_element(L, Not) ->
     E = lists:nth(random:uniform(length(L)), L),
     case E of
@@ -99,7 +100,9 @@ handle_cast({remove, Pid}, {World, Animals}) ->
 handle_call(step, _From, S = {World, Animals}) ->
     world:step(World),
     Temperature = world:get_temperature(World),
-    [ platypus:step(Name, random_element(Animals, Name), Temperature) || Name <- Animals ],
+    Fights = permutate:get(Animals, 10, length(Animals)),
+    Run = lists:zip(Animals, Fights),
+    [ platypus:step(Name, Prey, Temperature) || {Name, Prey} <- Run ],
     wait(length(Animals)), %% We don't need to wait for world
     {reply, ok, S};    
 

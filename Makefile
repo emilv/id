@@ -20,7 +20,7 @@ REQUIRED_DIR_NAME := pop_2012_project_group_$(GROUP_NUMBER)
 PROJECT_DIR := $(notdir $(shell pwd))
 
 USER=$(shell whoami)
-A1;1202;0cRCHIVE_NAME :=  $(REQUIRED_DIR_NAME)_archive_$(USER)_$(shell date "+%Y-%m-%d__%H:%M:%S")__.tar.gz
+ARCHIVE_NAME :=  $(REQUIRED_DIR_NAME)_archive_$(USER)_$(shell date "+%Y-%m-%d__%H:%M:%S")__.tar.gz
 ARCHIVE_DIR := ..
 
 .PHONY: doc all clean start test archive remove_finderinfo

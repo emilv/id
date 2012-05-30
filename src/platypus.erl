@@ -43,8 +43,8 @@ start(Stats, Habitat, World) ->
     {ok, Pid} = gen_server:start_link(?MODULE, {Habitat, Stats, World}, []),
     Pid.
 
-step(Name, Opponent, Temperature) ->
-    gen_server:cast(Name, {step, Opponent, Temperature}).
+step(Name, Prey, Temperature) ->
+    gen_server:cast(Name, {step, Prey, Temperature}).
 
 get_stats(Name) ->
     gen_server:call(Name, get_stats).
@@ -52,6 +52,8 @@ get_stats(Name) ->
 attack(Name, Power) ->
     Alive = is_process_alive(Name),
     if
+	Name == self() ->
+	    false;
 	Alive ->
 	    gen_server:cast(Name, {fight, self(), Power}),
 	    receive
@@ -219,11 +221,12 @@ init(State) ->
 terminate(_Reason, _LoopData) ->
     ok.
 
-handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
+handle_cast({step, Prey, Temperature}, {Habitat, Stats, World}) ->
 
-    Stats2 = lists:foldr(fun (_, Acc) -> act(Acc, Habitat, World, Opponent) end,
+    Run = lists:zip(lists:seq(1, 10), Prey),
+    Stats2 = lists:foldr(fun ({_, Opponent}, Acc) -> act(Acc, Habitat, World, Opponent) end,
 			 Stats,
-			 lists:seq(1, 10)),
+			 Run),
 
     {energy, Energy} = stats:get(energy, Stats2),
     {age, Age} = stats:get(age, Stats2),

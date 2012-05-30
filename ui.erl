@@ -27,6 +27,14 @@
 	 }).
 
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Anropas för att starta en simulering 
+   %%
+   %% @end
+   %% ----------------------------------
+
 start() ->
     Animals = element(2,io:read("Number of animals: ")),
     PidForHabitat = habitat:start(Animals),

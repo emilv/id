@@ -7,7 +7,6 @@
 
 %% @doc
 %% Startar en simulation med N individer.
-%%
 %% Returnerar pid till skapad simulation
 %%
 %% @spec start(integer()) -> pid()
@@ -20,7 +19,7 @@ create_animal(Name) ->
     gen_server:cast(Name, create).
 
 %% @doc
-%% Som create_animal/1 men med definierade egenskaper
+%% Som {@link create_animal/1} men med definierade egenskaper
 %% i form av ett stats-objekt.
 create_animal(Stats, Name) ->
     gen_server:cast(Name, {create, Stats}).

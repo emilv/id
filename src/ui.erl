@@ -46,10 +46,14 @@ looper(Pid, Steps) ->
     Message = "Command: ",
     case io:get_line(Message) of
 	"help\n" ->
-	    io:format("step:\t(enter)\nmany steps:\t(number + enter)\nquit:\tquit\n"),
+	    io:format("add:\tadd\nstep:\t(enter)\nmany steps:\t(number + enter)\nquit:\tquit\n"),
 	    looper(Pid, Steps);
 	"quit\n" ->
 	    ok;
+	"add\n" ->
+	    add(Pid),
+	    printStatistics(Pid, Steps),
+	    looper(Pid, Steps);
         "\n" ->
 	    habitat:step(Pid),%% skicka meddelande till habitatet om ett step
 	    printStatistics(Pid, Steps+1),
@@ -61,6 +65,21 @@ looper(Pid, Steps) ->
   	    looper(Pid, Steps+I)
     end.
 
+add(Habitat) ->
+    GetF = readInt("Get food: "),
+    Rep =  readInt("Reproduce: "),
+    Fight  =  readInt("Fight: "),
+    Def  =  readInt("Defence: "),
+    Att  =  readInt("Attack: "),
+    N  =  readInt("Number of animals: "),
+    Stats = platypus:create_stat({GetF, Rep, Fight, Def, Att}),
+    [habitat:create_animal(Stats, Habitat) || _ <- lists:seq(1,N)].
+  
+    
+
+readInt(Prompt) ->
+    X = io:get_line(Prompt),
+    element(1, string:to_integer(X)).
 
 makeManySteps(N, Pid) when N > 0 ->
     habitat:step(Pid, N).

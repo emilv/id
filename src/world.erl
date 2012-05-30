@@ -29,7 +29,7 @@ random(Min, Max) ->
 init(_) ->
     random:seed(now()),
     Stats = stats:set([{max_food, 10000},
-		       {food_growth, 400},
+		       {food_growth, 2000},
 		       {food, 500},
 		       {temperature, 20}
 		      ], stats:new()),

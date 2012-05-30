@@ -1,14 +1,29 @@
 -module(platypus).
--export([start/2, start/3, step/3, get_stats/1, get_action/2, attack/2]).
+-export([start/2, start/3, step/3, get_stats/1, get_action/2, attack/2, create_stat/1]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, extreme/0]).
 -behavior(gen_server).
 
 -record(actions, {reproduce = 10,
 		  get_food = 30,
-		  fight = 0
+		  fight = 3
 		 }).
 
 %% API %%
+
+create_stat({GF, R, F, D, A}) ->
+    Stats = stats:new(),
+    Actions = #actions{reproduce = R,
+		      get_food = GF,
+		      fight = F},
+    NewS = stats:set([{actions, normalize_actions(Actions)},
+		      {attack, A},
+		      {defence, D},
+		      {temperature, 20},
+		      {age, 4},
+		      {alive, true},
+		      {maxage, 200},
+		      {energy, 20}
+		      ], Stats).
 
 start(Habitat, World) ->
     Actions = #actions{},
@@ -242,19 +257,22 @@ handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
     Habitat ! done,
     Status;
 
-handle_cast({fight, From, Power}, S = {_Habitat, Stats, _World}) ->
+handle_cast({fight, From, Power}, S = {Habitat, Stats, World}) ->
     {defence, Defence} = stats:get(defence, Stats),
     Protection = random(0, trunc(Defence)),
     case Power - Protection of
 	N when N > 0 -> % I lost
 	    {energy, Energy} = stats:get(energy, Stats),
 	    From ! {win, self(), Energy},
-	    {stop, normal, S};
+	    NewS=stats:set([{alive, false}, {energy, 0}], Stats);
 	    
 	N when N =< 0 -> % I won
 	    From ! {lose, self(), -N},
-	    {noreply, S}
-    end.
+	    NewS=Stats
+    end,
+    {noreply, {Habitat, NewS, World}}.
+
+
 
 handle_call(get_stats, _From, S = {_Habitat, Stats, _World}) ->
     {reply, Stats, S}.

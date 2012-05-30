@@ -1,10 +1,10 @@
 -module(platypus).
 -export([start/2, start/3, step/3, get_stats/1, get_action/2, attack/2]).
--export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
+-export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, extreme/0]).
 -behavior(gen_server).
 
 -record(actions, {reproduce = 20,
-		  get_food = 60,
+		  get_food = 20,
 		  fight = 0
 		 }).
 
@@ -16,7 +16,7 @@ start(Habitat, World) ->
       stats:set([{energy, 10},
 		 {actions, normalize_actions(Actions)},
 		 {age, 4},
-		 {maxage, 20},
+		 {maxage, 200},
 		 {defence, 10},
 		 {attack, 10},
 		 {temperature, 20},
@@ -79,9 +79,13 @@ act(Stats, Habitat, World, Opponent) ->
 	Alive == false ->
 	    Stats2;
     	Random < Reproduce ->
-    	    reproduce(Stats2, Habitat),
- 	    {energy, Energy} = stats:get(energy, Stats2),
-	    NewStats = stats:set(energy, Energy-2, Stats2);
+    	    Reprod = reproduce(Stats2, Habitat),
+	    if Reprod == true ->
+		    {energy, Energy} = stats:get(energy, Stats2),
+		    NewStats = stats:set(energy, Energy-3, Stats2);
+	       true ->
+		    Stats2
+	    end;
     	Random < GetFood + Reproduce ->
     	    get_food(Stats2, World);
 	Random < GetFood + Reproduce + Fight ->
@@ -108,25 +112,27 @@ get_action(get_food,  #actions{get_food  = R}) -> R;
 get_action(reproduce, #actions{reproduce = R}) -> R;
 get_action(fight,     #actions{fight     = R}) -> R.
     
+extreme() ->
+    trunc(random(0,990)/1000)*10 + 1.
 
 mutate(Stats) ->
     {actions, A} = stats:get(actions, Stats),
-
-    NewA = normalize_actions(#actions{reproduce = or_zero(A#actions.reproduce + random(-3, 3)),
-				      get_food  = or_zero(A#actions.get_food  + random(-3, 3)),
-				      fight     = or_zero(A#actions.fight     + random(-3, 3))}),
+    
+    NewA = normalize_actions(#actions{reproduce = or_zero(A#actions.reproduce + random(-3, 3)*extreme()),
+				      get_food  = or_zero(A#actions.get_food  + random(-3, 3)*extreme()),
+				      fight     = or_zero(A#actions.fight     + random(-3, 3)*extreme())}),
 
     {maxage, M} = stats:get(maxage, Stats),
-    NewMaxAge = or_zero(M + (random(-1, 1)/10)),
+    NewMaxAge = or_zero(M + (random(-10, 10)*extreme())),
 
     {attack, Atk} = stats:get(attack, Stats),
-    NewAttack = or_zero(Atk + random(-3, 3)),
+    NewAttack = or_zero(Atk + random(-3, 3)*extreme()),
     
     {defence, Def} = stats:get(defence, Stats),
-    NewDefence = or_zero(Def + random(-3, 3)),
+    NewDefence = or_zero(Def + random(-3, 3)*extreme()),
 
     {temperature, Temp} = stats:get(temperature, Stats),
-    NewTemp = Temp + random(-1, 1),
+    NewTemp = Temp + random(-1, 1)*extreme(),
 
     stats:set([{actions, NewA},
 	       {maxage, NewMaxAge},
@@ -138,16 +144,19 @@ mutate(Stats) ->
 reproduce(Stats, Habitat) ->
     Random = random(1, 5),
     {age, Age} = stats:get(age, Stats),
-    {maxage, Maxage} = stats:get(maxage, Stats),
+%    {maxage, Maxage} = stats:get(maxage, Stats),
+    {energy, Energy} = stats:get(energy, Stats),
+	   
     if
-	Age < Maxage / 10 ->
-	    false;
-	Age > 4* Maxage / 5 ->
+%	Age < Maxage / 10 ->
+%	    false;
+%	Age > 4* Maxage / 5 ->
+%	    false;
+	Energy < 4 ->
 	    false;
 	Random == 1 ->
 	    NewS = mutate(Stats),
-	    {energy, Energy} = stats:get(energy, Stats),
-	    NewStats = stats:set([{energy, Energy-2},{age, 0}], NewS),
+	    NewStats = stats:set([{energy, 2},{age, 0}], NewS),
 	    habitat:create_animal(NewStats, Habitat),
 	    true;
 	true -> false
@@ -210,7 +219,7 @@ handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
     
     NewEnergy = Energy -
 	trunc((Def + Atk) / 10) -
-	temperature_loss(Stats2, Temperature),
+	temperature_loss(Stats2, Temperature) - 1,
     NewStats = stats:set([{energy, NewEnergy},
 			  {age, Age + 1}],
 			 Stats2),

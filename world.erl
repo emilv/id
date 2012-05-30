@@ -40,7 +40,7 @@ handle_cast(step, Stats) ->
     {food, Food} = stats:get(food, Stats),
     {max_food, MaxFood} = stats:get(max_food, Stats),
     {temperature, T} = stats:get(temperature, Stats),
-    NewTemp = T + random(-1,1) + (20-T)/40,
+    NewTemp = T + random(-1,1)*platypus:extreme() + (20-T)/40,
     NewFood = min(MaxFood, Food + Growth),
     NewStats = stats:set(temperature, NewTemp, Stats),
     NewStats2 = stats:set(food, NewFood, NewStats),

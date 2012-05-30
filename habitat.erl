@@ -4,33 +4,119 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen tar argumentet N som anger antalet individer vid start av en simulation
+   %%
+   %% Funktionen returnerar pid till skapad simulation
+   %%
+   %% @spec start(integer()) -> pid()
+   %%
+   %% @end
+   %% ----------------------------------
+
 start(N) ->
     {ok, Pid} = gen_server:start(?MODULE, N, []),
     Pid.
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen skapar ett nytt djur som placeras i habitatet
+   %%
+   %% @end
+   %% ----------------------------------
+
 create_animal(Name) ->
     gen_server:cast(Name, create).
+
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen skapar ett nytt djur som placeras i habitatet
+   %%
+   %% @end
+   %% ----------------------------------
 
 create_animal(Stats, Name) ->
     gen_server:cast(Name, {create, Stats}).
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen tar argumentet Pid som den tar bort ur habitatet Name
+   %%
+   %% @end
+   %% ----------------------------------
+
 remove_animal(Pid, Name) ->
     gen_server:cast(Name, {remove, Pid}).
+
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen returnerar slumpmässigt ett av djuren i habitet
+   %%
+   %% @end
+   %% ----------------------------------
 
 random_animal(Name) ->
     gen_server:call(Name, random_animal).
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen ber om mat från världen Name
+   %%
+   %% Returnerar 1 om det fanns mat annars 0
+   %%
+   %% @end
+   %% ----------------------------------
+
 get_food(Animal, Name) ->
     gen_server:call(Name, {get_food, Animal}, infinity).
+
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Funktionen returnerar en lista med stats från djuren i habitatet Name
+   %%
+   %% @end
+   %% ----------------------------------
 
 list(Name) ->
     gen_server:call(Name, list, infinity).
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Returnerar stats från världen Name
+   %%
+   %% @end
+   %% ----------------------------------
+
 world(Name) ->
     gen_server:call(Name, world, infinity).
 
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Skickar ett stepmeddelande till alla djur och världen som habitatet Name håller i
+   %%
+   %% @end
+   %% ----------------------------------
+
 step(Name) ->
     gen_server:call(Name, step, infinity).
+
+   %% ----------------------------------
+   %% @doc
+   %%
+   %% Skickar ett stepmeddelande till alla djur och världen som habitatet Name håller i, N gånger
+   %%
+   %% @end
+   %% ----------------------------------
 
 step(Name, N) ->
     [step(Name) || _ <- lists:seq(1,N)].

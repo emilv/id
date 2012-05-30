@@ -1,7 +1,7 @@
 -module(statistics).
 -export([mean/1, median/1, variance/1, variance/2,
 	 deviation/1, deviation/2, meanAndDev/1,
-	 bar/2, bar/4]).
+	 bar/2, bar/4, meanAndBar/2, meanAndBar/4]).
 -include_lib("eunit/include/eunit.hrl").
 
 mean([]) -> 0;
@@ -40,7 +40,17 @@ meanAndDev(L) ->
     Dev = deviation(L, Mean),
     {Mean, Dev}.
 
-%% 0-[.:|:. .|:. . ]-100
+meanAndBar(L, Width) ->
+    Mean = mean(L),
+    Bar = bar(L, Width),
+    {Mean, Bar}.
+
+meanAndBar(L, Width, Min, Max) ->
+    Mean = mean(L),
+    Bar = bar(L, Width, Min, Max),
+    {Mean, Bar}.
+
+%% 0 [.:|:. .|:. . ] 100
 bar(Foo, Width) ->
     Max = lists:max(Foo),
     Min = lists:min(Foo),
@@ -48,11 +58,11 @@ bar(Foo, Width) ->
 
 bar(Foo, Width, Min, Max) ->
     Count = length(Foo),
-    Interval = (Max-Min)/Width,
-    Factor = Width / Count,
+    Interval = max(1, (Max-Min)/Width),
+    Factor = Count / Width,
     
     ArrayAdd = fun(E, A) ->
-		       Index = trunc((E - Min) / Interval),
+		       Index = min(trunc((E - Min) / Interval), Width-1),
 		       Old = array:get(Index, A),
 		       array:set(Index, Old + 1, A)
 	       end,
@@ -63,14 +73,14 @@ bar(Foo, Width, Min, Max) ->
     
     AddChar = fun(_Index, Value, String) ->
 		      Char = if
-				 Value >= Factor * 0.8 -> $| ;
-				 Value >= Factor * 0.5 -> $: ;
+				 Value >= Factor * 2-> $| ;
+				 Value >= Factor * 1 -> $: ;
 				 Value >= Factor * 0.1 -> $. ;
 				 true -> $ end,
 		      [Char | String]
 	      end,
     Bar = array:foldr(AddChar, "", Array),
-    io_lib:format("~B-[~s]-~B", [Min, Bar, Max]).
+    io_lib:format("~3.B [~s] ~-3.B", [trunc(Min), Bar, trunc(Max)]).
     
 
 %% Tests %%

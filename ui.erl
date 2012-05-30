@@ -6,24 +6,23 @@
 	  food,
 	  temperature,
 	  get_food_mean,
-	  get_food_dev,
+	  get_food_bar,
 	  reprod_mean,
-	  reprod_dev,
+	  reprod_bar,
 	  fight_mean,
-	  fight_dev,
+	  fight_bar,
 	  attack_mean,
-	  attack_dev,
+	  attack_bar,
 	  defence_mean,
-	  defence_dev,
+	  defence_bar,
 	  energy_mean,
-	  energy_dev,
+	  energy_bar,
 	  age_mean,
-	  age_median,
-	  age_dev,
+	  age_bar,
 	  maxage_mean,
-	  maxage_dev,
+	  maxage_bar,
 	  temp_mean,
-	  temp_dev
+	  temp_bar
 	 }).
 
 
@@ -75,68 +74,68 @@ printStatistics(Pid) ->
 	      "Animal count: ~p~n"
 	      "ANIMAL STATS:~n"
 	      "Priorities:~n"
-	      "Get food:     ~.2f %\t(deviation: ~.1f)~n"
-	      "Reproduce:    ~.2f %\t(deviation: ~.1f)~n"
-	      "Fight:        ~.2f %\t(deviation: ~.1f)~n"
+	      "Get food:     ~.2f %\t~s~n"
+	      "Reproduce:    ~.2f %\t~s~n"
+	      "Fight:        ~.2f %\t~s~n"
 	      "Physical properties:~n"
-	      "Attack:       ~.2f\t(deviation: ~.1f)~n"
-	      "Defence:      ~.2f\t(deviation: ~.1f)~n"
-	      "Temperature:  ~.1f\t(deviation: ~.1f)~n"
-	      "Max age:      ~.2f\t(deviation: ~.1f)~n"
+	      "Attack:       ~.2f\t~s~n"
+	      "Defence:      ~.2f\t~s~n"
+	      "Temperature:  ~.1f\t~s~n"
+	      "Max age:      ~.2f\t~s~n"
 	      "Current status:~n"
-	      "Age:          ~.2f\t(deviation: ~.1f)~n"
-	      "Energy:       ~.2f\t(deviation: ~.1f)~n"
+	      "Age:          ~.2f\t~s~n"
+	      "Energy:       ~.2f\t~s~n"
 	      , [S#statistics.food, S#statistics.temperature, S#statistics.animals,
-		 S#statistics.get_food_mean, S#statistics.get_food_dev,
-		 S#statistics.reprod_mean, S#statistics.reprod_dev,
-		 S#statistics.fight_mean, S#statistics.fight_dev,
-		 S#statistics.attack_mean, S#statistics.attack_dev,
-		 S#statistics.defence_mean, S#statistics.defence_dev,
-		 S#statistics.temp_mean, S#statistics.temp_dev,
-		 S#statistics.maxage_mean, S#statistics.maxage_dev,
-		 S#statistics.age_mean, S#statistics.age_dev,
-		 S#statistics.energy_mean, S#statistics.energy_dev
+		 S#statistics.get_food_mean, S#statistics.get_food_bar,
+		 S#statistics.reprod_mean, S#statistics.reprod_bar,
+		 S#statistics.fight_mean, S#statistics.fight_bar,
+		 S#statistics.attack_mean, S#statistics.attack_bar,
+		 S#statistics.defence_mean, S#statistics.defence_bar,
+		 S#statistics.temp_mean, S#statistics.temp_bar,
+		 S#statistics.maxage_mean, S#statistics.maxage_bar,
+		 S#statistics.age_mean, S#statistics.age_bar,
+		 S#statistics.energy_mean, S#statistics.energy_bar
 		]
 	     ).
 
 
 getStatistics(Pid) ->
+    W = 20, % Bar width
     L = habitat:list(Pid),
     World = habitat:world(Pid),
     Len = length(L),
     {food, Food} = stats:get(food, World),
     {temperature, Temperature} = stats:get(temperature, World),
-    {FoodMean, FoodDev} = statistics:meanAndDev(stats(get_food, L)),
-    {ReMean, ReDev} = statistics:meanAndDev(stats(reproduce, L)),
-    {FightMean, FightDev} = statistics:meanAndDev(stats(fight, L)),
-    {AttackMean, AttackDev} = statistics:meanAndDev(stats(attack, L)),
-    {DefenceMean, DefenceDev} = statistics:meanAndDev(stats(defence, L)),
-    {EnergyMean, EnergyDev} = statistics:meanAndDev(stats(energy, L)),
-    {AgeMean, AgeDev} = statistics:meanAndDev(stats(age, L)),
-    {MaxAgeMean, MaxAgeDev} = statistics:meanAndDev(stats(maxage, L)),
-    {TempMean, TempDev} = statistics:meanAndDev(stats(temperature, L)),
+    {FoodMean, FoodBar} = statistics:meanAndBar(stats(get_food, L), W, 0, 100),
+    {ReMean, ReBar} = statistics:meanAndBar(stats(reproduce, L), W, 0, 100),
+    {FightMean, FightBar} = statistics:meanAndBar(stats(fight, L), W, 0, 100),
+    {AttackMean, AttackBar} = statistics:meanAndBar(stats(attack, L), W),
+    {DefenceMean, DefenceBar} = statistics:meanAndBar(stats(defence, L), W),
+    {EnergyMean, EnergyBar} = statistics:meanAndBar(stats(energy, L), W),
+    {AgeMean, AgeBar} = statistics:meanAndBar(stats(age, L), W),
+    {MaxAgeMean, MaxAgeBar} = statistics:meanAndBar(stats(maxage, L), W),
+    {TempMean, TempBar} = statistics:meanAndBar(stats(temperature, L), W),
     #statistics{animals       = Len,
 		food          = Food,
 		temperature   = Temperature,
 		get_food_mean = FoodMean,
-		get_food_dev  = FoodDev,
+		get_food_bar  = FoodBar,
 		reprod_mean   = ReMean, 
-		reprod_dev    = ReDev,
+		reprod_bar    = ReBar,
 		fight_mean    = FightMean,
-		fight_dev     = FightDev,
+		fight_bar     = FightBar,
 		attack_mean   = AttackMean,
-		attack_dev    = AttackDev,
+		attack_bar    = AttackBar,
 		defence_mean  = DefenceMean,
-		defence_dev   = DefenceDev,
+		defence_bar   = DefenceBar,
 		energy_mean   = EnergyMean,
-		energy_dev    = EnergyDev,
+		energy_bar    = EnergyBar,
 		age_mean      = AgeMean,
-		age_median    = null,
-		age_dev       = AgeDev,
+		age_bar       = AgeBar,
 		maxage_mean   = MaxAgeMean,
-		maxage_dev    = MaxAgeDev,
+		maxage_bar    = MaxAgeBar,
 		temp_mean     = TempMean,
-		temp_dev      = TempDev
+		temp_bar      = TempBar
 	       }.
 
 stats(A, L) when A == get_food; A == reproduce; A == fight ->

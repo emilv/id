@@ -1,4 +1,4 @@
-#################### 
+B#################### 
 GROUP_NUMBER := 2
 ####################
 
@@ -20,7 +20,7 @@ REQUIRED_DIR_NAME := pop_2012_project_group_$(GROUP_NUMBER)
 PROJECT_DIR := $(notdir $(shell pwd))
 
 USER=$(shell whoami)
-ARCHIVE_NAME :=  $(REQUIRED_DIR_NAME)_archive_$(USER)_$(shell date "+%Y-%m-%d__%H:%M:%S")__.tar.gz
+A1;1202;0cRCHIVE_NAME :=  $(REQUIRED_DIR_NAME)_archive_$(USER)_$(shell date "+%Y-%m-%d__%H:%M:%S")__.tar.gz
 ARCHIVE_DIR := ..
 
 .PHONY: doc all clean start test archive remove_finderinfo
@@ -45,7 +45,7 @@ doc:
 clean:
 	rm -fr .#* *.dump
 	rm -fr ebin/*.beam
-	(find doc/ -name "*" -a ! -name overview.edoc -exec rm -rf {} \;)
+	(find doc/ ! -name overview.edoc ! -name doc -exec rm -rf {} \;)
 
 remove_finderinfo:
 	-xattr -d "com.apple.FinderInfo" src/*.erl include/*.hrl doc/*

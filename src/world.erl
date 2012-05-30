@@ -1,10 +1,13 @@
 -module(world).
--export([start/0, get_food/2, get_temperature/1, step/1, list/1]).
+-export([start/0, start/2, get_food/2, get_temperature/1, step/1, list/1]).
 -export([init/1, handle_cast/2, handle_call/3]).
 -behavior(gen_server).
 
 start() ->
-    {ok, Pid} = gen_server:start_link(?MODULE, [], []),
+    start(2000, 20).
+
+start(FoodGrowth, Temperature) ->
+    {ok, Pid} = gen_server:start_link(?MODULE, {FoodGrowth, Temperature}, []),
     Pid.
 
 step(World) ->
@@ -26,22 +29,20 @@ random(Min, Max) ->
 
 % Callbacks %
 
-init(_) ->
+init({FoodGrowth, Temperature}) ->
     random:seed(now()),
-    Stats = stats:set([{max_food, 10000},
-		       {food_growth, 2000},
-		       {food, 500},
-		       {temperature, 20}
+    Stats = stats:set([{food_growth, FoodGrowth},
+		       {food, FoodGrowth},
+		       {temperature, Temperature}
 		      ], stats:new()),
     {ok, Stats}.
 
 handle_cast(step, Stats) ->
     {food_growth, Growth} = stats:get(food_growth, Stats),
     {food, Food} = stats:get(food, Stats),
-    {max_food, MaxFood} = stats:get(max_food, Stats),
     {temperature, T} = stats:get(temperature, Stats),
-    NewTemp = T + random(-1,1)*platypus:extreme() + (20-T)/40,
-    NewFood = min(MaxFood, Food + Growth),
+    NewTemp = T + random(-1,1) + (20-T)/40,
+    NewFood = Food + Growth,
     NewStats = stats:set(temperature, NewTemp, Stats),
     NewStats2 = stats:set(food, NewFood, NewStats),
     {noreply, NewStats2}.

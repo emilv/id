@@ -26,17 +26,19 @@
 	 }).
 
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Anropas för att starta en simulering 
-   %%
-   %% @end
-   %% ----------------------------------
+%% ----------------------------------
+%% @doc
+%%
+%% Anropas för att starta en simulering 
+%%
+%% @end
+%% ----------------------------------
 
 start() ->
-    Animals = element(2,io:read("Number of animals: ")),
-    PidForHabitat = habitat:start(Animals),
+    Animals = readInt("Number of animals: "),
+    FoodGrowth = readInt("Food growth (recommended 2000): "),
+    Temperature = 20,
+    PidForHabitat = habitat:start(Animals, FoodGrowth, Temperature),
     io:format("Type 'help' for command list.\n"),
     looper(PidForHabitat, 0),
     ok.

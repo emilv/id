@@ -103,7 +103,8 @@ act(Stats, Habitat, World, Opponent) ->
 	       true ->
 		    Stats2
 	    end;
-    	Random < GetFood + Reproduce ->
+
+	Random < GetFood + Reproduce ->
     	    get_food(Stats2, World);
 	Random < GetFood + Reproduce + Fight ->
 	    fight(Stats2, Opponent);
@@ -181,7 +182,8 @@ reproduce(Stats, Habitat) ->
 
 get_food(Stats, World) ->
     {energy, Energy} = stats:get(energy, Stats),
-    NewEnergy = min(10, Energy + world:get_food(self(), World)),
+ %   NewEnergy = min(10, Energy + world:get_food(self(), World)),
+    NewEnergy = Energy + world:get_food(self(), World),
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
 
@@ -197,7 +199,7 @@ fight(Stats, Opponent) ->
 	{win, Food} ->
 	    NewEnergy = Energy + Food;
 	{lose, Injury} ->
-	    NewEnergy = Energy - Injury;
+	    NewEnergy = Energy - Injury/20;
 	false ->
 	    NewEnergy = Energy
     end,
@@ -267,7 +269,7 @@ handle_cast({fight, From, Power}, S = {Habitat, Stats, World}) ->
 	N when N > 0 -> % I lost
 	    {energy, Energy} = stats:get(energy, Stats),
 	    From ! {win, self(), Energy},
-	    NewS=stats:set([{alive, false}, {energy, 0}], Stats);
+	    NewS=stats:set([{alive, false}, {energy, 0}, {defence, 0}], Stats);
 	    
 	N when N =< 0 -> % I won
 	    From ! {lose, self(), -N},

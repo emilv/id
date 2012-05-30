@@ -6,12 +6,13 @@
 -behavior(gen_server).
 
 %% @doc
-%% Startar en simulation med N individer.
+%% Startar en simulation med N individer,
+%% mattillväxten FoodGrowth samt temperaturen Temperature
 %% Returnerar pid till skapad simulation
 %%
-%% @spec start(integer()) -> pid()
-start(N) ->
-    {ok, Pid} = gen_server:start(?MODULE, N, []),
+%% @spec start(integer(), integer(), integer()) -> pid()
+start(N, FoodGrowth, Temperature) ->
+    {ok, Pid} = gen_server:start(?MODULE, {N, FoodGrowth, Temperature}, []),
     Pid.
 
 %% @doc Skapar nytt djur i en befintlig simulation
@@ -77,10 +78,10 @@ random_element(L, Not) ->
 
 %% Callbacks %%
 
-init(N) ->
+init({N, FoodGrowth, Temperature}) ->
     process_flag(trap_exit, true),
     random:seed(now()),
-    World = world:start(),
+    World = world:start(FoodGrowth, Temperature),
     Animals = [ platypus:start(self(), World) || _ <- lists:seq(1, N) ],
     {ok, {World, Animals}}.
 

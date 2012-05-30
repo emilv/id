@@ -1,3 +1,3 @@
-#!/bin/sh
-cd ebin/
+#!/bin/bash
+cd $(dirname "$0")/ebin/
 erl -noshell -eval "ui:start()." -s init stop

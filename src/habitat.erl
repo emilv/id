@@ -1,127 +1,62 @@
+%% @copyright Kopimi
 -module(habitat).
 -export([start/1, create_animal/1, create_animal/2, remove_animal/2, random_animal/1,
-	 get_food/2, list/1, world/1, step/1, step/2]).
+	 list/1, world/1, step/1, step/2]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen tar argumentet N som anger antalet individer vid start av en simulation
-   %%
-   %% Funktionen returnerar pid till skapad simulation
-   %%
-   %% @spec start(integer()) -> pid()
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc
+%% Startar en simulation med N individer.
+%%
+%% Returnerar pid till skapad simulation
+%%
+%% @spec start(integer()) -> pid()
 start(N) ->
     {ok, Pid} = gen_server:start(?MODULE, N, []),
     Pid.
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen skapar ett nytt djur som placeras i habitatet
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc Skapar nytt djur i en befintlig simulation
 create_animal(Name) ->
     gen_server:cast(Name, create).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen skapar ett nytt djur som placeras i habitatet
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc
+%% Som create_animal/1 men med definierade egenskaper
+%% i form av ett stats-objekt.
 create_animal(Stats, Name) ->
     gen_server:cast(Name, {create, Stats}).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen tar argumentet Pid som den tar bort ur habitatet Name
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc Tar bort djuret Pid ur simulationen Name.
 remove_animal(Pid, Name) ->
     gen_server:cast(Name, {remove, Pid}).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen returnerar slumpmässigt ett av djuren i habitet
-   %%
-   %% @end
-   %% ----------------------------------
 
+%% @doc
+%% V�lj slumpmässigt ett av djuren i habitet
 random_animal(Name) ->
     gen_server:call(Name, random_animal).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen ber om mat från världen Name
-   %%
-   %% Returnerar 1 om det fanns mat annars 0
-   %%
-   %% @end
-   %% ----------------------------------
-
-get_food(Animal, Name) ->
-    gen_server:call(Name, {get_food, Animal}, infinity).
-
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Funktionen returnerar en lista med stats från djuren i habitatet Name
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc
+%% Returnerar en lista med stats från djuren i habitatet Name
 list(Name) ->
     gen_server:call(Name, list, infinity).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Returnerar stats från världen Name
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc Returnerar stats fr�n simulationens v�rld
 world(Name) ->
     gen_server:call(Name, world, infinity).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Skickar ett stepmeddelande till alla djur och världen som habitatet Name håller i
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc K�r simulationen ett steg.
 step(Name) ->
     gen_server:call(Name, step, infinity).
 
-   %% ----------------------------------
-   %% @doc
-   %%
-   %% Skickar ett stepmeddelande till alla djur och världen som habitatet Name håller i, N gånger
-   %%
-   %% @end
-   %% ----------------------------------
-
+%% @doc K�r simulationen N steg.
 step(Name, N) ->
     [step(Name) || _ <- lists:seq(1,N)].
 
 %% Internal functions %%
+
+%% @doc
+%% Inv�nta N stycken done-meddelanden.
+%% Dessa skickas fr�n simulationens djur n�r de �r klara med varje steg.
 wait(N) when N =< 0 ->
     ok;
 wait(N) ->
@@ -130,6 +65,7 @@ wait(N) ->
 	    wait(N-1)
     end.
 
+%% @doc V�lj ett slumpm�ssigt elemnt ur en lista
 random_element(L, Not) ->
     E = lists:nth(random:uniform(length(L)), L),
     case E of

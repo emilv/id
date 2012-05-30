@@ -23,6 +23,8 @@ USER=$(shell whoami)
 ARCHIVE_NAME :=  $(REQUIRED_DIR_NAME)_archive_$(USER)_$(shell date "+%Y-%m-%d__%H:%M:%S")__.tar.gz
 ARCHIVE_DIR := ..
 
+.PHONY: doc all clean start test archive remove_finderinfo
+
 all: $(BEAM_FILES)
 
 ebin:
@@ -37,7 +39,7 @@ start: all
 test: all
 	(cd ebin && erl -noinput -eval 'eunit:test({dir, "."}, [verbose]), init:stop()')
 
-doc: $(BEAM_FILES)
+doc:
 	erl -noshell -eval "edoc:files($(EDOC_SRC_LIST), [{dir, 'doc'}])" -s init stop
 
 clean:

@@ -1,5 +1,5 @@
 #################### 
-GROUP_NUMBER := xx
+GROUP_NUMBER := 2
 ####################
 
 ERLC := erlc

@@ -3,8 +3,8 @@
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, extreme/0]).
 -behavior(gen_server).
 
--record(actions, {reproduce = 20,
-		  get_food = 20,
+-record(actions, {reproduce = 10,
+		  get_food = 30,
 		  fight = 0
 		 }).
 
@@ -13,11 +13,11 @@
 start(Habitat, World) ->
     Actions = #actions{},
     start(
-      stats:set([{energy, 10},
+      stats:set([{energy, 4},
 		 {actions, normalize_actions(Actions)},
 		 {age, 4},
 		 {maxage, 200},
-		 {defence, 10},
+		 {defence, 2},
 		 {attack, 10},
 		 {temperature, 20},
 		 {alive, true}
@@ -218,7 +218,7 @@ handle_cast({step, Opponent, Temperature}, {Habitat, Stats, World}) ->
     {alive, Alive} = stats:get(alive, Stats2),
     
     NewEnergy = Energy -
-	trunc((Def + Atk) / 10) -
+	(Def + Atk) / 10 -
 	temperature_loss(Stats2, Temperature) - 1,
     NewStats = stats:set([{energy, NewEnergy},
 			  {age, Age + 1}],
@@ -248,11 +248,13 @@ handle_cast({fight, From, Power}, S = {_Habitat, Stats, _World}) ->
     case Power - Protection of
 	N when N > 0 -> % I lost
 	    {energy, Energy} = stats:get(energy, Stats),
-	    From ! {win, self(), Energy};
+	    From ! {win, self(), Energy},
+	    {stop, normal, S};
+	    
 	N when N =< 0 -> % I won
-	    From ! {lose, self(), -N}
-    end,
-    {noreply, S}.
+	    From ! {lose, self(), -N},
+	    {noreply, S}
+    end.
 
 handle_call(get_stats, _From, S = {_Habitat, Stats, _World}) ->
     {reply, Stats, S}.

@@ -38,26 +38,27 @@ start() ->
     Animals = element(2,io:read("Number of animals: ")),
     PidForHabitat = habitat:start(Animals),
     io:format("Type 'help' for command list.\n"),
-    looper(PidForHabitat),
+    looper(PidForHabitat, 0),
     ok.
 
 
-looper(Pid) ->
+looper(Pid, Steps) ->
     Message = "Command: ",
     case io:get_line(Message) of
 	"help\n" ->
 	    io:format("step:\t(enter)\nmany steps:\t(number + enter)\nquit:\tquit\n"),
-	    looper(Pid);
+	    looper(Pid, Steps);
 	"quit\n" ->
 	    ok;
         "\n" ->
 	    habitat:step(Pid),%% skicka meddelande till habitatet om ett step
-	    printStatistics(Pid),
-	    looper(Pid);
+	    printStatistics(Pid, Steps+1),
+	    looper(Pid, Steps+1);
 	X ->
-  	    makeManySteps(element(1,string:to_integer(X)), Pid),
-	    printStatistics(Pid),
-  	    looper(Pid)
+	    I = element(1,string:to_integer(X)),
+  	    makeManySteps(I, Pid),
+	    printStatistics(Pid, Steps+I),
+  	    looper(Pid, Steps+I)
     end.
 
 
@@ -65,9 +66,10 @@ makeManySteps(N, Pid) when N > 0 ->
     habitat:step(Pid, N).
 
 
-printStatistics(Pid) ->
+printStatistics(Pid, Steps) ->
     S = getStatistics(Pid),
     io:format("~n"
+	      "Steps run:    ~p~n"
 	      "WORLD STATS:~n"
 	      "World food:   ~p~n"
 	      "World temp:   ~.1f~n"
@@ -85,7 +87,8 @@ printStatistics(Pid) ->
 	      "Current status:~n"
 	      "Age:          ~.2f\t~s~n"
 	      "Energy:       ~.2f\t~s~n"
-	      , [S#statistics.food, S#statistics.temperature, S#statistics.animals,
+	      , [Steps,
+		 S#statistics.food, S#statistics.temperature, S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_bar,
 		 S#statistics.reprod_mean, S#statistics.reprod_bar,
 		 S#statistics.fight_mean, S#statistics.fight_bar,
@@ -100,7 +103,7 @@ printStatistics(Pid) ->
 
 
 getStatistics(Pid) ->
-    W = 20, % Bar width
+    W = 30, % Bar width
     L = habitat:list(Pid),
     World = habitat:world(Pid),
     Len = length(L),

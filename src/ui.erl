@@ -36,7 +36,7 @@
 
 start() ->
     Animals = readInt("Number of animals: "),
-    FoodFrowth = readInt("Food growth (recommended 2000): "),
+    FoodGrowth = readInt("Food growth (recommended 2000): "),
     Temperature = 20,
     PidForHabitat = habitat:start(Animals, FoodGrowth, Temperature),
     io:format("Type 'help' for command list.\n"),

@@ -1,6 +1,6 @@
 %% @copyright Kopimi
 -module(habitat).
--export([start/1, create_animal/1, create_animal/2, remove_animal/2, random_animal/1,
+-export([start/3, create_animal/1, create_animal/2, remove_animal/2, random_animal/1,
 	 list/1, world/1, step/1, step/2]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).

@@ -1,3 +1,10 @@
+%% @copyright Kopimi
+
+%% @doc
+%% Ett djur i simulationen. Djuret har ett antal prioriteringar på hur det spenderar sin tid,
+%% egenskaper som används vid jakt och avgör djurets energiförbrukning, samt några nuvärden som anger 
+%% nuvarande energinivå och data såsom ålder.
+%% Ett djur kan äta mat från världen, jaga andra djur samt föröka sig.
 -module(platypus).
 -export([start/2, start/3, step/3, get_stats/1, get_action/2, attack/2, create_stat/1]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, extreme/0]).

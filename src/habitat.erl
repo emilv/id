@@ -1,4 +1,11 @@
 %% @copyright Kopimi
+
+%% @doc
+%% Huvudmodulen för en simulation. Genom att köra {@link start/3} påbörjas en simulation.
+%% En simulation består av en {@link world} med data om miljön (temperatur, mat, ...) samt
+%% ett antal {@link platypus}-objekt (kallade <em>djur</em>). Det är här nya djur i simulationen
+%% skapas och det är den här modulen som håller koll på alla levande djur.
+%% @end
 -module(habitat).
 -export([start/3, create_animal/1, create_animal/2, remove_animal/2, random_animal/1,
 	 list/1, world/1, step/1, step/2]).
@@ -78,6 +85,7 @@ random_element(L, Not) ->
 
 %% Callbacks %%
 
+%% @private
 init({N, FoodGrowth, Temperature}) ->
     process_flag(trap_exit, true),
     random:seed(now()),
@@ -85,10 +93,12 @@ init({N, FoodGrowth, Temperature}) ->
     Animals = [ platypus:start(self(), World) || _ <- lists:seq(1, N) ],
     {ok, {World, Animals}}.
 
+%% @private
 handle_cast(create, {World, Animals}) ->
     NewAnimals = [ platypus:start(self(), World) | Animals ],
     {noreply, {World, NewAnimals}};
 
+%% @private
 handle_cast({create, Stats}, {World, Animals}) ->
     NewAnimals = [ platypus:start(Stats, self(), World) | Animals ],
     {noreply, {World, NewAnimals}};
@@ -98,6 +108,7 @@ handle_cast({remove, Pid}, {World, Animals}) ->
 			P =/= Pid],
     {noreply, {World, NewAnimals}}.
 
+%% @private
 handle_call(step, _From, S = {World, Animals}) ->
     world:step(World),
     Temperature = world:get_temperature(World),
@@ -120,11 +131,7 @@ handle_call(world, _From, S = {World, _Animals}) ->
     Reply = world:list(World),
     {reply, Reply, S}.
 
-
-%handle_call({get_food, Animal}, _From, S = {World, _Animals}) ->
-%    {stop, old_code, S}.
-    %{reply, world:get_food(Animal, World), S}.
-
+%% @private
 handle_info({'EXIT', Pid, _Reason}, {World, Animals}) ->
     NewAnimals = lists:filter(fun (Pid2) -> Pid =/= Pid2 end, Animals),
     {noreply, {World, NewAnimals}}.

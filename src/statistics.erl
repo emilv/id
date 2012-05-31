@@ -75,7 +75,7 @@ bar(Foo, Width, Min, Max) ->
 		      Char = if
 				 Value >= Factor * 2-> $| ;
 				 Value >= Factor * 1 -> $: ;
-				 Value >= Factor * 0.1 -> $. ;
+				 Value >= 1 -> $. ; %Factor * 0.1 -> $. ;
 				 true -> $ end,
 		      [Char | String]
 	      end,

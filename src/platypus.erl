@@ -272,7 +272,7 @@ handle_cast({fight, From, Power}, S = {Habitat, Stats, World}) ->
 	    NewS=stats:set([{alive, false}, {energy, 0}, {defence, 0}], Stats);
 	    
 	N when N =< 0 -> % I won
-	    From ! {lose, self(), -N},
+	    From ! {lose, self(), 0},
 	    NewS=Stats
     end,
     {noreply, {Habitat, NewS, World}}.

@@ -1,10 +1,10 @@
 %% @copyright Kopimi
 
 %% @doc
-%% Huvudmodulen för en simulation. Genom att köra {@link start/3} påbörjas en simulation.
-%% En simulation består av en {@link world} med data om miljön (temperatur, mat, ...) samt
-%% ett antal {@link platypus}-objekt (kallade <em>djur</em>). Det är här nya djur i simulationen
-%% skapas och det är den här modulen som håller koll på alla levande djur.
+%% Huvudmodulen fÃ¶r en simulation. Genom att kÃ¶ra {@link start/3} pÃ¥bÃ¶rjas en simulation.
+%% En simulation bestÃ¥r av en {@link world} med data om miljÃ¶n (temperatur, mat, ...) samt
+%% ett antal {@link platypus}-objekt (kallade <em>djur</em>). Det Ã¤r hÃ¤r nya djur i simulationen
+%% skapas och det Ã¤r den hÃ¤r modulen som hÃ¥ller koll pÃ¥ alla levande djur.
 %% @end
 -module(habitat).
 -export([start/3, create_animal/1, create_animal/2, remove_animal/2, random_animal/1,
@@ -14,7 +14,7 @@
 
 %% @doc
 %% Startar en simulation med N individer,
-%% mattillväxten FoodGrowth samt temperaturen Temperature
+%% mattillvÃ¤xten FoodGrowth samt temperaturen Temperature
 %% Returnerar pid till skapad simulation
 %%
 %% @spec start(integer(), integer(), integer()) -> pid()
@@ -38,32 +38,32 @@ remove_animal(Pid, Name) ->
 
 
 %% @doc
-%% Välj slumpmÃ¤ssigt ett av djuren i habitet
+%% VÃ¤lj slumpmÃƒÂ¤ssigt ett av djuren i habitet
 random_animal(Name) ->
     gen_server:call(Name, random_animal).
 
 %% @doc
-%% Returnerar en lista med stats frÃ¥n djuren i habitatet Name
+%% Returnerar en lista med stats frÃƒÂ¥n djuren i habitatet Name
 list(Name) ->
     gen_server:call(Name, list, infinity).
 
-%% @doc Returnerar stats från simulationens värld
+%% @doc Returnerar stats frÃ¥n simulationens vÃ¤rld
 world(Name) ->
     gen_server:call(Name, world, infinity).
 
-%% @doc Kör simulationen ett steg.
+%% @doc KÃ¶r simulationen ett steg.
 step(Name) ->
     gen_server:call(Name, step, infinity).
 
-%% @doc Kör simulationen N steg.
+%% @doc KÃ¶r simulationen N steg.
 step(Name, N) ->
     [step(Name) || _ <- lists:seq(1,N)].
 
 %% Internal functions %%
 
 %% @doc
-%% Invänta N stycken done-meddelanden.
-%% Dessa skickas från simulationens djur när de är klara med varje steg.
+%% InvÃ¤nta N stycken done-meddelanden.
+%% Dessa skickas frÃ¥n simulationens djur nÃ¤r de Ã¤r klara med varje steg.
 wait(N) when N =< 0 ->
     ok;
 wait(N) ->
@@ -72,8 +72,8 @@ wait(N) ->
 	    wait(N-1)
     end.
 
-%% @doc Välj ett slumpmässigt element ur en lista
-%%      Elementet får inte vara Not
+%% @doc VÃ¤lj ett slumpmÃ¤ssigt element ur en lista
+%%      Elementet fÃ¥r inte vara Not
 random_element(L, Not) ->
     E = lists:nth(random:uniform(length(L)), L),
     case E of

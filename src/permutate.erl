@@ -1,6 +1,6 @@
 %% @copyright Kopimi
 
-%% @doc Givet en lista L, skapa samtidigt ett antal slumpade dellistor med element från L.
+%% @doc Givet en lista L, skapa samtidigt ett antal slumpade dellistor med element frÃ¥n L.
 -module(permutate).
 -export([get/3]).
 -export([work/4]).
@@ -22,11 +22,11 @@ collect(N, Id, Acc) ->
 	    collect(N-1, Id, [L|Acc])
     end.
 
-%% @doc Välj ett slumpmässigt element ur L
+%% @doc VÃ¤lj ett slumpmÃ¤ssigt element ur L
 random_element(L) ->
     lists:nth(random:uniform(length(L)), L).
 
-%% @doc Välj N slumpmässiga element ur L
+%% @doc VÃ¤lj N slumpmÃ¤ssiga element ur L
 random_elements(L, N) ->
     [random_element(L) || _ <- lists:seq(1, N)].
 

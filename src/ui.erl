@@ -29,7 +29,7 @@
 %% ----------------------------------
 %% @doc
 %%
-%% Anropas för att starta en simulering 
+%% Anropas fÃ¶r att starta en simulering 
 %%
 %% @end
 %% ----------------------------------

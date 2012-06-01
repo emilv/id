@@ -92,7 +92,8 @@ readInt(Prompt) ->
 
 %% @private
 makeManySteps(N, Pid) when N > 0 ->
-    habitat:step(Pid, N).
+    [ {io:format("*"),habitat:step(Pid)} || _ <-lists:seq(1,N)],
+    io:format("\n").
 
 %% @private
 printStatistics(Pid, Steps) ->

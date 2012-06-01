@@ -8,7 +8,7 @@
 %% @end
 -module(habitat).
 -export([start/3, create_animal/1, create_animal/2, remove_animal/2, random_animal/1,
-	 list/1, world/1, step/1, step/2]).
+	 list/1, world/1, step/1, step/2, change/3]).
 -export([init/1, handle_cast/2, handle_call/3, handle_info/2]).
 -behavior(gen_server).
 
@@ -38,18 +38,22 @@ remove_animal(Pid, Name) ->
 
 
 %% @doc
-%% Välj slumpmÃ¤ssigt ett av djuren i habitet
+%% Välj slumpmässigt ett av djuren i habitet
 random_animal(Name) ->
     gen_server:call(Name, random_animal).
 
 %% @doc
-%% Returnerar en lista med stats frÃ¥n djuren i habitatet Name
+%% Returnerar en lista med stats från djuren i habitatet Name
 list(Name) ->
     gen_server:call(Name, list, infinity).
 
 %% @doc Returnerar stats från simulationens värld
 world(Name) ->
     gen_server:call(Name, world, infinity).
+
+%% @doc Ändra omgivningens temperatur och mattillväxt
+change(Name, Temperature, FoodGrowth) ->
+    gen_server:cast(Name, {change, Temperature, FoodGrowth}).
 
 %% @doc Kör simulationen ett steg.
 step(Name) ->
@@ -106,7 +110,11 @@ handle_cast({create, Stats}, {World, Animals}) ->
 handle_cast({remove, Pid}, {World, Animals}) ->
     NewAnimals = [ P || P <- Animals,
 			P =/= Pid],
-    {noreply, {World, NewAnimals}}.
+    {noreply, {World, NewAnimals}};
+
+handle_cast({change, Temperature, FoodGrowth}, S = {World, _Animals}) ->
+    world:change(World, Temperature, FoodGrowth),
+    {noreply, S}.
 
 %% @private
 handle_call(step, _From, S = {World, Animals}) ->

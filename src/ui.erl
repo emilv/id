@@ -7,6 +7,7 @@
 -record(statistics, {
 	  animals,
 	  food,
+	  food_growth,
 	  temperature,
 	  get_food_mean,
 	  get_food_bar,
@@ -34,7 +35,7 @@
 start() ->
     Animals = readInt("Number of animals: "),
     FoodGrowth = readInt("Food growth (recommended 2000): "),
-    Temperature = 20,
+    Temperature = readInt("Temperature: "),
     PidForHabitat = habitat:start(Animals, FoodGrowth, Temperature),
     io:format("Type 'help' for command list.\n"),
     looper(PidForHabitat, 0).
@@ -44,13 +45,20 @@ looper(Pid, Steps) ->
     Message = "Command: ",
     case io:get_line(Message) of
 	"help\n" ->
-	    io:format("add:\tadd\nstep:\t(enter)\nmany steps:\t(number + enter)\nquit:\tquit\n"),
+	    io:format("add animals: add\n"
+		      "change environment: set\n"
+		      "step:        (enter)\n"
+		      "many steps:  (number + enter)\n"
+		      "quit:        quit\n"),
 	    looper(Pid, Steps);
 	"quit\n" ->
 	    ok;
 	"add\n" ->
 	    add(Pid),
 	    printStatistics(Pid, Steps),
+	    looper(Pid, Steps);
+	"set\n" ->
+	    set(Pid),
 	    looper(Pid, Steps);
         "\n" ->
 	    habitat:step(Pid),%% skicka meddelande till habitatet om ett step
@@ -63,7 +71,6 @@ looper(Pid, Steps) ->
   	    looper(Pid, Steps+I)
     end.
 
-%% @private
 add(Habitat) ->
     GetF = readInt("Get food: "),
     Rep =  readInt("Reproduce: "),
@@ -73,8 +80,12 @@ add(Habitat) ->
     N  =  readInt("Number of animals: "),
     Stats = platypus:create_stat({GetF, Rep, Fight, Def, Att}),
     [habitat:create_animal(Stats, Habitat) || _ <- lists:seq(1,N)].
+
+set(Habitat) ->
+    Temperature = readInt("New temperature: "),
+    FoodGrowth = readInt("New food growth rate: "),
+    habitat:change(Habitat, Temperature, FoodGrowth).
   
-%% @private
 readInt(Prompt) ->
     X = io:get_line(Prompt),
     element(1, string:to_integer(X)).
@@ -90,7 +101,8 @@ printStatistics(Pid, Steps) ->
 	      "Steps run:    ~p~n"
 	      "WORLD STATS:~n"
 	      "World food:   ~p~n"
-	      "World temp:   ~.1f~n"
+	      "Food growth:  ~p~n"
+	      "World temp:   ~p~n"
 	      "Animal count: ~p~n"
 	      "ANIMAL STATS:~n"
 	      "Priorities:~n"
@@ -106,7 +118,8 @@ printStatistics(Pid, Steps) ->
 	      "Age:          ~.2f\t~s~n"
 	      "Energy:       ~.2f\t~s~n"
 	      , [Steps,
-		 S#statistics.food, S#statistics.temperature, S#statistics.animals,
+		 S#statistics.food, S#statistics.food_growth, S#statistics.temperature,
+		 S#statistics.animals,
 		 S#statistics.get_food_mean, S#statistics.get_food_bar,
 		 S#statistics.reprod_mean, S#statistics.reprod_bar,
 		 S#statistics.fight_mean, S#statistics.fight_bar,
@@ -126,6 +139,7 @@ getStatistics(Pid) ->
     World = habitat:world(Pid),
     Len = length(L),
     {food, Food} = stats:get(food, World),
+    {food_growth, Growth} = stats:get(food_growth, World),
     {temperature, Temperature} = stats:get(temperature, World),
     {FoodMean, FoodBar} = statistics:meanAndBar(stats(get_food, L), W, 0, 100),
     {ReMean, ReBar} = statistics:meanAndBar(stats(reproduce, L), W, 0, 100),
@@ -138,6 +152,7 @@ getStatistics(Pid) ->
     {TempMean, TempBar} = statistics:meanAndBar(stats(temperature, L), W),
     #statistics{animals       = Len,
 		food          = Food,
+		food_growth   = Growth,
 		temperature   = Temperature,
 		get_food_mean = FoodMean,
 		get_food_bar  = FoodBar,

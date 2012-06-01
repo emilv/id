@@ -3,7 +3,7 @@
 %% @doc Håller reda på ett antal egenskaper om simuleringens värld, såsom temperatur och matmängd. Skapar ny mat.
 %% Världen är en egen process.
 -module(world).
--export([start/0, start/2, get_food/2, get_temperature/1, step/1, list/1]).
+-export([start/0, start/2, get_food/2, get_temperature/1, step/1, list/1, change/3]).
 -export([init/1, handle_cast/2, handle_call/3]).
 -behavior(gen_server).
 
@@ -33,7 +33,11 @@ get_food(Animal, World) ->
 get_temperature(World) ->
     gen_server:call(World, get_temperature, infinity).
 
-%% @doc Slumässigt heltal mellan Min och Max (inklusive)
+%% @doc Ändra temperatur och mattillväxt
+change(World, Temperature, FoodGrowth) ->
+    gen_server:cast(World, {change, Temperature, FoodGrowth}).
+
+%% @doc Slumpässigt heltal mellan Min och Max (inklusive)
 random(Min, Max) ->
     Random = random:uniform(Max - Min + 1),
     Random + Min - 1.
@@ -55,11 +59,17 @@ handle_cast(step, Stats) ->
     {food_growth, Growth} = stats:get(food_growth, Stats),
     {food, Food} = stats:get(food, Stats),
     {temperature, T} = stats:get(temperature, Stats),
-    NewTemp = T + random(-1,1) + (20-T)/40,
+    %NewTemp = T + (random(-100,100) / 100),
     NewFood = Food + Growth,
-    NewStats = stats:set(temperature, NewTemp, Stats),
-    NewStats2 = stats:set(food, NewFood, NewStats),
-    {noreply, NewStats2}.
+    NewStats = stats:set(food, NewFood, Stats),
+    {noreply, NewStats};
+
+handle_cast({change, Temperature, FoodGrowth}, Stats) ->
+    NewStats = stats:set([{food_growth, FoodGrowth},
+			  {temperature, Temperature}],
+			 Stats),
+    {noreply, NewStats}.
+    
     
 %% @private
 handle_call(list, _From, Stats) ->

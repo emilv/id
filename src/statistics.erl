@@ -1,22 +1,29 @@
+%% @copyright Kopimi
+
+%% @doc Generellt statistik-bibliotek för arbete med listor
 -module(statistics).
 -export([mean/1, median/1, variance/1, variance/2,
 	 deviation/1, deviation/2, meanAndDev/1,
 	 bar/2, bar/4, meanAndBar/2, meanAndBar/4]).
 -include_lib("eunit/include/eunit.hrl").
 
+%% @doc Medelvärdet av L
 mean([]) -> 0;
 mean(L) ->
     lists:sum(L) / length(L).
 
+%% @doc Medianen av L
 median([]) -> 0;
 median(L) when length(L) rem 2 == 1 ->
     lists:nth(trunc(length(L)/2) + 1, lists:sort(L));
 median(L) when length(L) rem 2 == 0 ->
     mean(lists:sublist(lists:sort(L), trunc(length(L)/2), 2)).
 
+%% @doc Variansen av L med väntevärdet definierat som medelvärdet
 variance(L) ->
     variance(L, mean(L)).
 
+%% @doc Variansen av L med väntevärdet E
 variance([], _E) -> 0;
 variance(L, E) -> 
     N = length(L),
@@ -29,33 +36,42 @@ variance(L, E) ->
 		    L
 		   ).
 
+%% @doc Standardavvikelsen i L med medelvärdet som väntevärde
 deviation(L) ->
     deviation(L, mean(L)).
 
+%% @doc Standardavvikelsen i L med väntevärdet E
 deviation(L, E) ->
     math:sqrt(variance(L, E)).
 
+%% @doc Medelvärde och standardavvikelse för L
 meanAndDev(L) ->
     Mean = mean(L),
     Dev = deviation(L, Mean),
     {Mean, Dev}.
 
+%% @doc Medelvärde och resultatet av {@link bar/2}
 meanAndBar(L, Width) ->
     Mean = mean(L),
     Bar = bar(L, Width),
     {Mean, Bar}.
 
+%% @doc Medelvärde och resultatet av {@link bar/4}
 meanAndBar(L, Width, Min, Max) ->
     Mean = mean(L),
     Bar = bar(L, Width, Min, Max),
     {Mean, Bar}.
 
-%% 0 [.:|:. .|:. . ] 100
+%% @doc
+%% <p>Skapa en mätare som visualiserar fördelningen av element i Foo. Antalet tecken mellan [ och ] är Width.</p>
+%% <p>Mätarens intervall definieras att gå från minsta till största värdet i Foo.</p>
+%% <p>Exempel: 0 [.:|:. .|:. . ] 100</p>
 bar(Foo, Width) ->
     Max = lists:max(Foo),
     Min = lists:min(Foo),
     bar(Foo, Width, Min, Max).
 
+%% @doc Som {@link bar/2} men intervallet bestäms till [Min, Max]. Alla element måste ligga inom intervallet.
 bar(Foo, Width, Min, Max) ->
     Count = length(Foo),
     Interval = max(1, (Max-Min)/Width),

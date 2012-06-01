@@ -7,7 +7,7 @@
 %% Ett djur kan äta mat från världen, jaga andra djur samt föröka sig.
 -module(platypus).
 -export([start/2, start/3, step/3, get_stats/1, get_action/2, attack/2, create_stat/1]).
--export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2, extreme/0]).
+-export([init/1, handle_cast/2, handle_call/3, handle_info/2, terminate/2]).
 -behavior(gen_server).
 
 -record(actions, {reproduce = 10,
@@ -17,6 +17,7 @@
 
 %% API %%
 
+%% @doc Skapa ett {@link stat}-objekt med några givna egenskaper.
 create_stat({GF, R, F, D, A}) ->
     Stats = stats:new(),
     Actions = #actions{reproduce = R,
@@ -32,6 +33,13 @@ create_stat({GF, R, F, D, A}) ->
 		      {energy, 20}
 		      ], Stats).
 
+%% @doc Plocka ut en egenskap ur en action-struktur.
+get_action(get_food,  #actions{get_food  = R}) -> R;
+get_action(reproduce, #actions{reproduce = R}) -> R;
+get_action(fight,     #actions{fight     = R}) -> R.
+
+%% @doc Skapa ett djur som tillhör simulationen Habitat med världen World.
+%% @spec start(pid(), pid()) -> pid()
 start(Habitat, World) ->
     Actions = #actions{},
     start(
@@ -46,16 +54,24 @@ start(Habitat, World) ->
 		],
 		stats:new()), Habitat, World).
 
+%% @doc Som {@link start/2} men djuret har även egenskaperna Stats
 start(Stats, Habitat, World) ->
     {ok, Pid} = gen_server:start_link(?MODULE, {Habitat, Stats, World}, []),
     Pid.
 
+%% @doc Kör ett steg i simulationen.
+%% Name är ett handtag det djur som ska köra. Prey är en lista med andra djur att jaga.
+%% Temperature är den nuvarande temperaturen i simulationens värld.
+%% Funktionen returnerar omedelbart. När steget är avslutat skickas ett meddelande med atomen <em>done</em>.
 step(Name, Prey, Temperature) ->
     gen_server:cast(Name, {step, Prey, Temperature}).
 
+%% @doc Få ut alla egenskaper från djuret Name i form av ett {@link stats}-objekt.
 get_stats(Name) ->
     gen_server:call(Name, get_stats).
 
+%% @private
+%% @doc Attackera djuret Name med kraften Power. Returnerar {win, Result}, {lose, Result} eller false.
 attack(Name, Power) ->
     Alive = is_process_alive(Name),
     if
@@ -77,6 +93,7 @@ attack(Name, Power) ->
 
 % Internal functions
 
+%% @private
 act(Stats, Habitat, World, Opponent) ->
 
     %% Sleep for better scheduling mix
@@ -119,6 +136,7 @@ act(Stats, Habitat, World, Opponent) ->
 	    Stats2
     end.
 
+%% @private
 normalize_actions(#actions{reproduce = Reproduce,
 			   get_food  = GetFood,
 			   fight     = Fight
@@ -128,18 +146,18 @@ normalize_actions(#actions{reproduce = Reproduce,
 	     get_food  = GetFood   * F,
 	     fight     = Fight     * F}.
 
+%% @private
+%% @doc N om N>0, annars 0
 or_zero(N) when N < 0 ->
     0;
 or_zero(N) ->
     N.
 
-get_action(get_food,  #actions{get_food  = R}) -> R;
-get_action(reproduce, #actions{reproduce = R}) -> R;
-get_action(fight,     #actions{fight     = R}) -> R.
-    
+%% @private    
 extreme() ->
     trunc(random(0,990)/1000)*10 + 1.
 
+%% @private
 mutate(Stats) ->
     {actions, A} = stats:get(actions, Stats),
     
@@ -166,6 +184,7 @@ mutate(Stats) ->
 	       {temperature, NewTemp}
 	       ], Stats).
 
+%% @private
 reproduce(Stats, Habitat) ->
     Random = random(1, 5),
     {age, Age} = stats:get(age, Stats),
@@ -187,6 +206,7 @@ reproduce(Stats, Habitat) ->
 	true -> false
     end.
 
+%% @private
 get_food(Stats, World) ->
     {energy, Energy} = stats:get(energy, Stats),
  %   NewEnergy = min(10, Energy + world:get_food(self(), World)),
@@ -194,10 +214,12 @@ get_food(Stats, World) ->
     NewStats = stats:set(energy, NewEnergy, Stats),
     NewStats.
 
+%% @private
 temperature_loss(Stats, WT) ->
     {temperature, T} = stats:get(temperature, Stats),
     abs(T-WT).
 
+%% @private
 fight(Stats, Opponent) ->
     {energy, Energy} = stats:get(energy, Stats),
     {attack, Attack} = stats:get(attack, Stats),
@@ -216,20 +238,24 @@ fight(Stats, Opponent) ->
 	    stats:set(alive, false, Stats)
     end.
 	
-
+%% @private
+%% @doc Slumpmässigt heltal i intervallet [Min, Max]
 random(Min, Max) when Max >= Min ->
     Random = random:uniform(Max - Min + 1),
     Random + Min - 1.
 
 %% Callbacks %%
 
+%% @private
 init(State) ->
     random:seed(now()),
     {ok, State}.
 
+%% @private
 terminate(_Reason, _LoopData) ->
     ok.
 
+%% @private
 handle_cast({step, Prey, Temperature}, {Habitat, Stats, World}) ->
 
     Run = lists:zip(lists:seq(1, 10), Prey),
@@ -285,11 +311,11 @@ handle_cast({fight, From, Power}, S = {Habitat, Stats, World}) ->
     {noreply, {Habitat, NewS, World}}.
 
 
-
+%% @private
 handle_call(get_stats, _From, S = {_Habitat, Stats, _World}) ->
     {reply, Stats, S}.
 
-
+%% @private
 handle_info({win, _, _}, S) ->
     {noreply, S};
 handle_info({lose, _, _}, S) ->

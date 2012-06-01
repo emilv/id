@@ -1,3 +1,6 @@
+%% @copyright Kopimi
+
+%% @doc Användargränssnitt för att köra en evolutionssimulering.
 -module(ui).
 -export([start/0]).
 
@@ -26,24 +29,17 @@
 	 }).
 
 
-%% ----------------------------------
-%% @doc
-%%
-%% Anropas för att starta en simulering 
-%%
-%% @end
-%% ----------------------------------
-
+%% @doc Kör en simulering. Frågar efter kommandon via standard-ut/standard-in.
+%% Returnerar <em>ok</em> när simulationen avslutats.
 start() ->
     Animals = readInt("Number of animals: "),
     FoodGrowth = readInt("Food growth (recommended 2000): "),
     Temperature = 20,
     PidForHabitat = habitat:start(Animals, FoodGrowth, Temperature),
     io:format("Type 'help' for command list.\n"),
-    looper(PidForHabitat, 0),
-    ok.
+    looper(PidForHabitat, 0).
 
-
+%% @private
 looper(Pid, Steps) ->
     Message = "Command: ",
     case io:get_line(Message) of
@@ -67,6 +63,7 @@ looper(Pid, Steps) ->
   	    looper(Pid, Steps+I)
     end.
 
+%% @private
 add(Habitat) ->
     GetF = readInt("Get food: "),
     Rep =  readInt("Reproduce: "),
@@ -77,16 +74,16 @@ add(Habitat) ->
     Stats = platypus:create_stat({GetF, Rep, Fight, Def, Att}),
     [habitat:create_animal(Stats, Habitat) || _ <- lists:seq(1,N)].
   
-    
-
+%% @private
 readInt(Prompt) ->
     X = io:get_line(Prompt),
     element(1, string:to_integer(X)).
 
+%% @private
 makeManySteps(N, Pid) when N > 0 ->
     habitat:step(Pid, N).
 
-
+%% @private
 printStatistics(Pid, Steps) ->
     S = getStatistics(Pid),
     io:format("~n"
@@ -122,7 +119,7 @@ printStatistics(Pid, Steps) ->
 		]
 	     ).
 
-
+%% @private
 getStatistics(Pid) ->
     W = 30, % Bar width
     L = habitat:list(Pid),
@@ -161,7 +158,7 @@ getStatistics(Pid) ->
 		temp_mean     = TempMean,
 		temp_bar      = TempBar
 	       }.
-
+%% @private
 stats(A, L) when A == get_food; A == reproduce; A == fight ->
     lists:map(fun(E) -> platypus:get_action(A, E) end, stats(actions, L));
 stats(Key, L) ->

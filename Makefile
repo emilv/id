@@ -40,12 +40,12 @@ test: all
 	(cd ebin && erl -noinput -eval 'eunit:test({dir, "."}, [verbose]), init:stop()')
 
 doc:
-	erl -noshell -eval "edoc:files($(EDOC_SRC_LIST), [{dir, 'doc'}])" -s init stop
+	erl -noshell -eval "edoc:files($(EDOC_SRC_LIST), [{dir, 'doc/html/'}])" -s init stop
 
 clean:
 	rm -fr .#* *.dump
 	rm -fr ebin/*.beam
-	(find doc/ ! -name overview.edoc ! -name doc -exec rm -rf {} \;)
+	(find doc/html/ ! -name overview.edoc ! -name html -exec rm -rf {} \;)
 
 remove_finderinfo:
 	-xattr -d "com.apple.FinderInfo" src/*.erl include/*.hrl doc/*

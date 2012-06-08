@@ -1,0 +1,879 @@
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Intelligent Design
+\end_layout
+
+\begin_layout Date
+Process Oriented Programming (1DT049),
+\begin_inset Newline newline
+\end_inset
+
+project proposal for group 2, 
+\begin_inset Newline newline
+\end_inset
+
+version 1, 2012-04-25
+\end_layout
+
+\begin_layout Author
+Emil Vikström
+\begin_inset Newline newline
+\end_inset
+
+880728-0493 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ Patrik Broman
+\begin_inset Newline newline
+\end_inset
+
+810416-7138 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ Erik Samuelsson
+\begin_inset Newline newline
+\end_inset
+
+890112-0413 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+and
+\end_layout
+
+\end_inset
+
+ Alexander Persson
+\begin_inset Newline newline
+\end_inset
+
+910207-1033
+\end_layout
+
+\begin_layout Section
+Brainstorm
+\end_layout
+
+\begin_layout Standard
+We brainstormed to get different ideas.
+ The result of that session is presented here.
+\end_layout
+
+\begin_layout Subsection
+Preconceptions
+\end_layout
+
+\begin_layout Standard
+Before starting we thought of brainstorming as a good way to get a lot of
+ ideas (good and bad ones).
+\end_layout
+
+\begin_layout Subsection
+Summary
+\end_layout
+
+\begin_layout Standard
+We introduce some ideas and evaluate the concurrent possibilities of the
+ ideas.
+\end_layout
+
+\begin_layout Subsubsection
+Ideas
+\end_layout
+
+\begin_layout Description
+Conway's
+\begin_inset space ~
+\end_inset
+
+Game
+\begin_inset space ~
+\end_inset
+
+of
+\begin_inset space ~
+\end_inset
+
+Life A grid with cells, each cell live or dead according to a set of rules
+ depending on neighbouring cells.
+\end_layout
+
+\begin_layout Description
+Chat
+\begin_inset space ~
+\end_inset
+
+Server IRC or similar.
+\end_layout
+
+\begin_layout Description
+Evolution
+\begin_inset space ~
+\end_inset
+
+simulation Similar to Game of Life, but each cell have a set of properties
+ such as attack, defense, energy need, temperature range...
+ Properties is inherited or possibly randomly mutated.
+\end_layout
+
+\begin_layout Description
+Web
+\begin_inset space ~
+\end_inset
+
+Crawler Crawl web pages, following links and extractig data (links to other
+ sites or important words from the page).
+ Possibly specialised for certain web sites like Wikipedia or similar.
+ Can possibly be extended to build a search engine.
+\end_layout
+
+\begin_layout Description
+MMO Some kind of multiplayer game with lots of players.
+\end_layout
+
+\begin_layout Description
+Facemash Web page showing a pair images, letting the audience pick a 
+\begin_inset Quotes eld
+\end_inset
+
+winner
+\begin_inset Quotes erd
+\end_inset
+
+ amongst them and then showing a new pair.
+ Rank images using some algorithm.
+\end_layout
+
+\begin_layout Description
+Compiler Compile and optimize some language.
+\end_layout
+
+\begin_layout Description
+Robo
+\begin_inset space ~
+\end_inset
+
+Rally Board game where each player 
+\begin_inset Quotes eld
+\end_inset
+
+program
+\begin_inset Quotes erd
+\end_inset
+
+ a robot with five instructions at a time, trying to reach valuable targets
+ on the game field.
+ Each robot, however, run only one instruction at a time before it's the
+ next robot's turn.
+ Robots may move each other, making it harder to reach the target.
+\end_layout
+
+\begin_layout Subsubsection
+Concurrency Evaluation
+\end_layout
+
+\begin_layout Description
+Conway's
+\begin_inset space ~
+\end_inset
+
+Game
+\begin_inset space ~
+\end_inset
+
+of
+\begin_inset space ~
+\end_inset
+
+Life Each cell is only dependent on its neighbours.
+ Therefore it should be possible to calculate the new state of a cell (according
+ to the rules) concurrently with knowledge about the neighbours.
+ This may be done by checking neighbours' states.
+\end_layout
+
+\begin_layout Description
+Chat
+\begin_inset space ~
+\end_inset
+
+Server Users and 
+\begin_inset Quotes eld
+\end_inset
+
+rooms
+\begin_inset Quotes erd
+\end_inset
+
+ are logically independent units.
+ Messages are sent between users and rooms.
+ We can easily see this implemented using message passing.
+\end_layout
+
+\begin_layout Description
+Evolution
+\begin_inset space ~
+\end_inset
+
+Simulation Cells are dependent on local factors like temperature, neighbours
+ and the cell's properaties.
+ Calculations should be possible to do concurrently in each cell with knowledge
+ about the surroundings.
+\end_layout
+
+\begin_layout Description
+Web
+\begin_inset space ~
+\end_inset
+
+Crawler Web pages may be independent units.
+ Different pages can then be crawled, parsed and saved in a concurrent fashion.
+ This problem is also heavilly I/O bound due to both network traffic and
+ performance of the web servers.
+ This means that a large amount of web pages should be possible to crawl
+ at the same time.
+\end_layout
+
+\begin_layout Description
+MMO An MMO must be implemented in some concurrent fashion because a large
+ amount of users (with possibly different state) must be handled at once.
+ The exact circumstances are defined by the game rules.
+\end_layout
+
+\begin_layout Description
+Facemash Running 
+\begin_inset Quotes eld
+\end_inset
+
+pair competitions
+\begin_inset Quotes erd
+\end_inset
+
+ is a concurrent problem since possibly thousands of users may use the service
+ at once.
+ Designing a ranking algorithm which is concurrent may be part of the project
+ problem.
+\end_layout
+
+\begin_layout Description
+Compiler Concurrency depends on the language compiled.
+ Some possibilites are to compile functions or modules independently.
+\end_layout
+
+\begin_layout Description
+Robo
+\begin_inset space ~
+\end_inset
+
+Rally The only concurrency possibility is to have different playing rooms
+ and handling user connections conccurently.
+ The game itself is turn-based and inherently sequential.
+\end_layout
+
+\begin_layout Subsection
+Conclusion
+\end_layout
+
+\begin_layout Standard
+We didn't come up with that many ideas.
+ The reason may be that the few ideas we came up with was that good that
+ we didn't find it worthwhile to continue.
+\end_layout
+
+\begin_layout Standard
+The next time we should probably try to come up with some bad ideas as well.
+ Really bad ideas may spark creativity.
+\end_layout
+
+\begin_layout Section
+Project Selection
+\end_layout
+
+\begin_layout Standard
+We chose "Evolution simulation".
+ The difficulty seems to be at a good level and the simulation also seems
+ very good for concurrency.
+ We also considered Conway's Game of Life and chat server, which both seemed
+ to be too simple or at least not that interesting.
+ Robo Rally is hard to make truly concurrent, which was a big showstopper.
+\end_layout
+
+\begin_layout Standard
+Evolution seems interesting both in the sense of learning how to program
+ concurrently, but also to get a better understanding for how evolution
+ works.
+ We will not fine tune the program to reach a certain result.
+ We will rather put in what we believe is a good model and see the result
+ from various parameters.
+\end_layout
+
+\begin_layout Standard
+Apart from what has already been mentioned we hope to learn more about cooperati
+on when programming.
+ This is also what we believe will be the biggest challenge.
+\end_layout
+
+\begin_layout Section
+System Architecture
+\end_layout
+
+\begin_layout Standard
+We here describe the main idea with the simulation, as well as a sketch
+ of the system design.
+\end_layout
+
+\begin_layout Subsection
+Main Ideas
+\end_layout
+
+\begin_layout Standard
+We focus on two main components:
+\end_layout
+
+\begin_layout Itemize
+Environment
+\end_layout
+
+\begin_layout Itemize
+Animals
+\end_layout
+
+\begin_layout Standard
+The environment is where the animals live.
+ Examples of properties is temperature, light, food, humidity, radiation
+ etc.
+\end_layout
+
+\begin_layout Standard
+It exists two different animals, herbivores and predators.
+ Every individual should have genes that specifies different properties,
+ such as prefered temperature, ability to withstand different environments
+ etc.
+ These properties will in some cases be ordered in pairs, like more muscles
+ means a need for more food.
+\end_layout
+
+\begin_layout Standard
+There will be random mutations which alter the properties.
+ Animals will be able to mate, but there will be constraints so that an
+ individual only can mate other individuals that are close enough (both
+ locallly close and 
+\begin_inset Quotes eld
+\end_inset
+
+genetically
+\begin_inset Quotes erd
+\end_inset
+
+ close).
+\end_layout
+
+\begin_layout Standard
+We plan to let every individual be a separate process in Erlang.
+\end_layout
+
+\begin_layout Standard
+The simulation is going to be done step by step, and each animal (process)
+ should handle its own actions and interactions with the environment and
+ other animals.
+ After each step, each process sends information to some GUI process.
+\end_layout
+
+\begin_layout Standard
+At first the environment will be constant, but it is possible that we will
+ try to use an environment that is changing over time.
+\end_layout
+
+\begin_layout Subsection
+Design
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename overview.jpg
+	width 100text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Simulation Design
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Example Animal
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Attribute
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Attack
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Defence
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Energy consumption
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Current energy
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+22
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+...
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The system will consist of one 
+\begin_inset Quotes eld
+\end_inset
+
+world
+\begin_inset Quotes erd
+\end_inset
+
+ with attributes such as 
+\begin_inset Quotes eld
+\end_inset
+
+grass
+\begin_inset Quotes erd
+\end_inset
+
+ (that herbavores can eat), 
+\begin_inset Quotes eld
+\end_inset
+
+temperature
+\begin_inset Quotes erd
+\end_inset
+
+ and similar (see figure 1).
+ In this world there will be 
+\begin_inset Quotes eld
+\end_inset
+
+animals
+\begin_inset Quotes erd
+\end_inset
+
+ which can communicate with each other.
+ The communcation will consist of things such as 
+\begin_inset Quotes eld
+\end_inset
+
+attack
+\begin_inset Quotes erd
+\end_inset
+
+ (from a carnivore trying to eat someone), and the receiving animal will
+ decide if the attack succeeds or not (replying this to the attacker).
+\end_layout
+
+\begin_layout Standard
+The world will be it's own entity, which acts as a collection of animals
+ but also faciilitates some environment variables such as 
+\begin_inset Quotes eld
+\end_inset
+
+grass
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Animals will also be their own entities, which can communicate with the
+ world to get handles to other animals and then directly communcate with
+ those animals.
+\end_layout
+
+\begin_layout Standard
+Animals have attributes (see table 1) which decides how easily they kill
+ someone (attack), how much energy they consume (which determines how often
+ and how much they must eat) and so on.
+ Some attributes keep track of the current state of the animal, such as
+ 
+\begin_inset Quotes eld
+\end_inset
+
+current energy
+\begin_inset Quotes erd
+\end_inset
+
+.
+ When that energy is at zero, the animal dies.
+ Some attributes may be dependant on each other, such as a high attack attribute
+ may require higher energy consumption.
+\end_layout
+
+\begin_layout Standard
+The GUI will be shown in the user's web browser.
+ This means that the user will communicate with a HTTP process on the server
+ side.
+ This HTTP process is responsible for keeping a handle to the user's entire
+ simulation.
+ The HTTP process is responsible for translating Erlang messages to ECMAScript
+ and/or HTML.
+\end_layout
+
+\begin_layout Subsubsection
+Animal Life
+\end_layout
+
+\begin_layout Standard
+As mentioned before, each animal will be a separate process, with some propertie
+s.
+ The main loop for each animal will be something like this (the exact details
+ to be found out during implementation):
+\end_layout
+
+\begin_layout Enumerate
+Try to get some food
+\end_layout
+
+\begin_layout Enumerate
+Try to survive the environment
+\end_layout
+
+\begin_layout Enumerate
+Try to mate
+\end_layout
+
+\begin_layout Enumerate
+Report to GUI
+\end_layout
+
+\begin_layout Standard
+For simplicity, the animals are pure herbavores or pure carnivores.
+\end_layout
+
+\begin_layout Section
+Concurrency Models and Programming Languages
+\end_layout
+
+\begin_layout Standard
+The way this project is concurrent is that every animal is a separate process,
+ making it possible for all animals to run its main loop concurrently.
+ Some things has to be sequential, but for most things, like testing if
+ an animal survives the environment with respect to temperature, radiation
+ etc, each animal can check if they manage.
+\end_layout
+
+\begin_layout Standard
+The system is also concurrent in it's simluation handling: multiple simulations
+ can be carried out by different users at the same time.
+ This will pose no big concurrency problems since simulations don't share
+ any global state.
+\end_layout
+
+\begin_layout Standard
+The language we are going to use is Erlang, since processes are really easy
+ to handle in that language.
+ GUI will also be made using ECMAScript (the only language supported by
+ web browsers).
+\end_layout
+
+\begin_layout Section
+Development tools
+\end_layout
+
+\begin_layout Standard
+The project requires multiple tools to build a stable product.
+ We touch on the subject here by presenting our editor, source control,
+ testing and building tools of choice.
+\end_layout
+
+\begin_layout Subsection
+Source Code Editor
+\end_layout
+
+\begin_layout Standard
+Emacs is the editor of choice due to the coherent indentation style for
+ Erlang.
+ It would be nice to let each developer pick his own editor, but then it's
+ hard to use the same indentation.
+ Developers are free to choose another editor if they can manage to configure
+ it to the style of erlang.el for Emacs.
+\end_layout
+
+\begin_layout Subsection
+Revision Control and Source Code Management
+\end_layout
+
+\begin_layout Standard
+We are planning to use Git for source control.
+ It will be hosted on the free service GitHub.
+\end_layout
+
+\begin_layout Subsection
+Build Tool
+\end_layout
+
+\begin_layout Standard
+We will use a simple Makefile for the project.
+ The Makefile will provide instructions for both building and testing the
+ program.
+ There is a build system for Erlang called Rebar which we will possibly
+ utilise as well, in which case we will implement it into the same Makefile.
+\end_layout
+
+\begin_layout Subsection
+Unit Testing
+\end_layout
+
+\begin_layout Standard
+Unit testing will be done with EUnit.
+ Each module will have it's own unit tests.
+ Each function will have at least one test, testing the general case.
+ Optimally functions will also test border cases, which we will aim at as
+ well.
+ At a later stage we will also write some integration tests.
+\end_layout
+
+\begin_layout Standard
+Some testing weill be done at the ECMAScript side of the GUI using the Jasmine
+ framework.
+ We will have more relaxed testing here, though, due to the complexity of
+ testing a GUI.
+ GUI testing will instead mainly be carried out by manually checking that
+ everything works.
+\end_layout
+
+\begin_layout Subsection
+Documentation Generation
+\end_layout
+
+\begin_layout Standard
+Every function should be documented with EDoc.
+ A function is not complete before it is documented.
+ Documentation can be quite informal, as long as it's clear what the purpose
+ of the function is.
+\end_layout
+
+\begin_layout Standard
+ECMAScript will be documented using ScriptDoc.
+\end_layout
+
+\end_body
+\end_document

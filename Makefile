@@ -50,7 +50,7 @@ clean:
 remove_finderinfo:
 	-xattr -d "com.apple.FinderInfo" src/*.erl include/*.hrl doc/*
 
-archive: clean
+archive: clean doc
 ifeq ("$(REQUIRED_DIR_NAME)", "$(PROJECT_DIR)")
 	cd $(ARCHIVE_DIR) && tar cvzf $(ARCHIVE_NAME) --exclude='.git*' $(PROJECT_DIR)
 	@echo 	

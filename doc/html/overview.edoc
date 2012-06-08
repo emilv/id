@@ -1,8 +1,8 @@
 @author Emil, Erik, Patrik
 @version 1.0
-@title Intelligent design
+@title Intelligent Design
 
 @doc
 == Introduction ==
 
-Intelligent Design is a program that simulates an easy evolution.
+Intelligent Design simulerar evolution. Gränssnittet finns i {@link ui} medan simulationen utförs av {@link habitat}, {@link platypus} och {@link world}. Hjälpmodulerna {@link statistics}, {@link stats} och {@link permutate} är generella och kan lätt användas i andra program.

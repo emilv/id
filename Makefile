@@ -52,7 +52,7 @@ remove_finderinfo:
 
 archive: clean
 ifeq ("$(REQUIRED_DIR_NAME)", "$(PROJECT_DIR)")
-	cd $(ARCHIVE_DIR) && tar cvzf $(ARCHIVE_NAME) $(PROJECT_DIR)
+	cd $(ARCHIVE_DIR) && tar --exclude='.git*' cvzf $(ARCHIVE_NAME) $(PROJECT_DIR)
 	@echo 	
 	@echo NOTE: Archive created in $(ARCHIVE_DIR)/$(ARCHIVE_NAME)
 	@echo 
